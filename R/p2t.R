@@ -1,10 +1,14 @@
-p2t <- function(umap_dir, label_dir, map_height = 1000, ...) {
+p2t <- function(umap_dir, label_dir, label_key, label_cols, map_height = 1000, ...) {
   umap_files <- list.files(umap_dir, full.names = TRUE)
   targ_crs <- raster::crs(raster::raster(umap_files[1]))
   band_count <- raster::nlayers(raster::stack(umap_files[1]))
   band_choices <- seq_len(band_count)
+  lab_cols <- c('Black','Green','Blue','Red')
+  
+  split_format <- tags$head(tags$style(HTML(".shiny-split-layout > div { overflow: visible; }")))
   
   ui <- shiny::fluidPage(
+    
     shiny::sidebarLayout(
     position = 'left',
     shiny::sidebarPanel(
@@ -14,6 +18,33 @@ p2t <- function(umap_dir, label_dir, map_height = 1000, ...) {
         label = 'Select image',
         choices = basename(umap_files)
       ),
+
+      shiny::splitLayout(
+        split_format,
+        cellWidths = c('0%', '30%', '30%', '30%'),
+        shiny::selectInput(
+          inputId = 'b_1',
+          label = 'R band',
+          choices = band_choices,
+          selected = 3,
+          width = 100
+        ),
+        shiny::selectInput(
+          inputId = 'b_2',
+          label = 'G band',
+          choices = band_choices,
+          selected = 4,
+          width = 100
+        ),
+        shiny::selectInput(
+          inputId = 'b_3',
+          label = 'B band',
+          choices = band_choices,
+          selected = 5,
+          width = 100
+        )
+      ), 
+      
       shiny::sliderInput(
         inputId = 'img_qt',
         label = 'Image quantiles',
@@ -21,28 +52,6 @@ p2t <- function(umap_dir, label_dir, map_height = 1000, ...) {
         value = c(0, 1),
         min = 0,
         max = 1
-      ),
-      
-      shiny::selectInput(
-        inputId = 'b_1',
-        label = 'R band',
-        choices = band_choices,
-        selected = 3, 
-        width = 100
-      ),
-      shiny::selectInput(
-        inputId = 'b_2',
-        label = 'G band',
-        choices = band_choices,
-        selected = 4,
-        width = 100
-      ),
-      shiny::selectInput(
-        inputId = 'b_3',
-        label = 'B band',
-        choices = band_choices,
-        selected = 5,
-        width = 100
       ),
       
       hr(),
@@ -56,16 +65,28 @@ p2t <- function(umap_dir, label_dir, map_height = 1000, ...) {
         max = 1,
         step = 0.01
       ),
-      
       shinyWidgets::switchInput(
         inputId = 'filter_noise',
-        label = 'Filter noise',
+        label = 'Filter\nnoise',
         value = TRUE,
         size = 'mini',
         onStatus = "success",
         offStatus = "danger"
+      ), 
+   
+     
+      shiny::selectInput(
+        inputId = 'label_class',
+        label = 'Label class',
+        choices = names(label_key),
+        selected = names(label_key)[0]
       ),
-      
+      shinyWidgets::actionBttn(inputId = 'assign',
+                               label = 'Assign painted to class',
+                               color = 'primary', 
+                               style = 'material-flat',
+                               size = 'sm'),
+   
       hr(),
       
       shiny::sliderInput(
@@ -168,29 +189,51 @@ p2t <- function(umap_dir, label_dir, map_height = 1000, ...) {
       vals
     })
     
-    painted_ras <- eventReactive(c(input$rgb_leaf_click, input$thresh, input$filter_noise) , {
-      if (is.null(umap_vals()[1]) | is.na(umap_vals()[1]) )
-        return()
-      udf <- data.frame(u1 = raster::values(umap_ras()[[1]]),
-                        u2 = raster::values(umap_ras())[[2]])
+    painted_ras <-
+      eventReactive(c(input$rgb_leaf_click, input$thresh, input$filter_noise) , {
+        if (is.null(umap_vals()[1]) | is.na(umap_vals()[1]))
+          return()
+        udf <- data.frame(u1 = raster::values(umap_ras()[[1]]),
+                          u2 = raster::values(umap_ras())[[2]])
+        
+        dists <- RANN::nn2(data = umap_vals(),
+                           query = umap_pts())$nn.dists %>% unlist()
+        painted_ras <- umap_ras()[[1]]
+        raster::values(painted_ras) <-
+          ifelse(scales::rescale(dists) < input$thresh, 1, NA)
+        
+        if (isTRUE(input$filter_noise)) {
+          f <-
+            raster::focal(painted_ras,
+                          FUN = sum,
+                          na.rm = TRUE,
+                          w = matrix(1, 3, 3))
+          loners <- which(raster::values(f) == 1)
+          raster::values(painted_ras)[loners] <- NA
+        }
+        
+        painted_ras
+        
+      })
+    
+    observe({
+      lab_file <- file.path(label_dir, basename(fname()))
+      if(!file.exists(file.path(label_dir, basename(fname())))){
+        label_ras <- umap_ras()[[1]]
+        raster::values(label_ras) <- 0
+        raster::writeRaster(label_ras, lab_file, overwrite = TRUE)
+        }
+    })
+    
+    observeEvent(input$assign,{
+      lab_file <- file.path(label_dir, basename(fname()))
+      label_ras <- raster::raster(lab_file)
+    
+      pix_to_class <- which(raster::values(painted_ras()) == 1)
+      class_val <- label_key[which(names(label_key) == input$label_class)] %>% unlist()
       
-      dists <- RANN::nn2(data = umap_vals(),
-                         query = umap_pts())$nn.dists %>% unlist()
-      painted_ras <- umap_ras()[[1]]
-      raster::values(painted_ras) <- ifelse(scales::rescale(dists) < input$thresh, 1, NA)
-      
-      if(isTRUE(input$filter_noise)) {
-        f <-
-          raster::focal(painted_ras,
-                        FUN = sum,
-                        na.rm = TRUE,
-                        w = matrix(1, 3, 3))
-        loners <- which(raster::values(f) == 1)
-        raster::values(painted_ras)[loners] <- NA
-      }
-      
-      painted_ras 
-      
+      raster::values(label_ras)[pix_to_class] <- class_val
+      raster::writeRaster(label_ras, lab_file, overwrite = TRUE)
     })
     
     shiny::observeEvent(
@@ -204,14 +247,20 @@ p2t <- function(umap_dir, label_dir, map_height = 1000, ...) {
         input$img_qt,
         input$b_1,
         input$b_2,
-        input$b_3
+        input$b_3,
+        input$assign
       ),
       {
+     
         if (is.null(umap_vals()[1]) | is.na(umap_vals()[1]) )
           return()
+        
+        labs <- raster::raster(file.path(label_dir, basename(fname())))
+        
         leaflet::leafletProxy(map = 'rgb_leaf') %>%
           leaflet::clearControls() %>%
           leaflet::clearGroup(group = 'Currently painted') %>%
+          leaflet::clearGroup(group = 'Labeled') %>%
           leaflet::addRasterImage(
             painted_ras(),
             color = tolower(input$paint_col),
@@ -220,7 +269,16 @@ p2t <- function(umap_dir, label_dir, map_height = 1000, ...) {
             group = 'Currently painted',
             method = 'ngb'
           ) %>%
-          leaflet::addLayersControl(overlayGroups = 'Currently painted')
+          leaflet::addRasterImage(
+            labs,
+            colors = label_cols,
+            project = TRUE,
+            group = 'Labeled',
+            method = 'ngb'
+          ) %>%
+          leaflet::addLayersControl(overlayGroups = c('Currently painted', 'Labeled'),
+                                    options = leaflet::layersControlOptions(collapsed = FALSE)) %>%
+          leaflet::hideGroup('Labeled')
         
       }
     )
