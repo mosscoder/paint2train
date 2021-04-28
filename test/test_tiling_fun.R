@@ -1,7 +1,7 @@
 source('https://raw.githubusercontent.com/mosscoder/paint2train/main/R/tile_at_coords.R')
 library(raster)
 
-image_dir <- '/Volumes/mpg_data/rasters/High_Res_Mosaics/2011_cir_ranch_clip.tif' #replace with path to any imagery
+image_dir <- '/Volumes/mpg_data/rasters/High_Res_Mosaics/2020_4band_clip_NAD83.tif' #replace with path to any imagery
 output_dir <- '~/Scratch/test_tiles' #where to dump tiles
 
 dir.create(output_dir)
