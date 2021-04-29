@@ -1,4 +1,4 @@
-ndvi_msavi <- function(tile, r_band = 1, nir_band = 2){
+ndvi_msavi <- function(tile, out_dir, r_band = 1, nir_band = 2){
   t <- raster::stack(tile)
   r <- t[[r_band]]
   nir <- t[[nir_band]]

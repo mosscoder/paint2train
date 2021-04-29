@@ -1,5 +1,6 @@
-#source('https://raw.githubusercontent.com/mosscoder/paint2train/main/R/tile_at_coords.R')
-source('~/mpgPostdoc/projects/paint2train/R/tile_at_coords.R')
+source('https://raw.githubusercontent.com/mosscoder/paint2train/main/R/tile_at_coords.R')
+source('https://raw.githubusercontent.com/mosscoder/paint2train/main/R/preproc_funs.R')
+#source('~/mpgPostdoc/projects/paint2train/R/tile_at_coords.R')
 library(raster)
 
 image_dir <- '/Volumes/mpg_data/rasters/High_Res_Mosaics/2020_4band_clip_NAD83.tif' #replace with path to any imagery
@@ -40,6 +41,8 @@ tile_at_coords(coords = coord_mat,
 par(mfrow = c(1,3))              
 for(i in seq_along(xcoords)){plotRGB(stack(list.files(raw_dir, full.names = T)[i])[[1:3]])}
 par(mfrow = c(1,1))
+
+#derive additional features
 
 
 
