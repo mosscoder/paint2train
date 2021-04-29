@@ -9,5 +9,5 @@ umap_tile <- function(tile_loc, out_dir, scl = TRUE, ...){
   values(umap_1)[cells] <- uwot_out[,1]
   values(umap_2)[cells] <- uwot_out[,2]
   umap_stack <- raster::stack(umap_1, umap_2, tile)
-  raster::writeRaster(umap_stack, filename = file.path(out_dir, basename(tile_loc)))
+  raster::writeRaster(umap_stack, filename = file.path(out_dir, basename(tile_loc)), overwrite = T)
 }

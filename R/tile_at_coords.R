@@ -3,13 +3,14 @@
 #in units of image and put them in out_dir
 
 tile_at_coords <-
-  function(coords, img, len_side, out_dir, ncores = 1, ...) {
+  function(coords, img, len_side, out_dir, buffer = 0, ncores = 1) {
     tile_ind <- seq_len(nrow(coords))
     
     ext_list <- replicate(extent(0, 0, 0, 0),
                           n = length(tile_ind))
     
     half_side <- len_side / 2
+    if(buffer > 0){ half_side <- half_side + buffer }
     
     for (i in tile_ind) {
       ext_list[[i]] <- raster::extent(coords[i, 1] - half_side,
@@ -38,7 +39,7 @@ tile_at_coords <-
                        ext_list[[x]],
                        filename = file.path(out_dir,
                                             paste0(names(ext_list)[x], '.tif')), 
-                       ...)
+                       overwrite = TRUE)
         },
         X = seq_along(tile_ind),
         mc.cores = ncores
@@ -50,7 +51,7 @@ tile_at_coords <-
                        ext_list[[x]],
                        filename = file.path(out_dir,
                                             paste0(names(ext_list)[x], '.tif')), 
-                       ...)
+                       overwrite = TRUE)
         },
         X = seq_along(tile_ind)
       )

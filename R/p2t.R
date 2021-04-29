@@ -233,6 +233,17 @@ p2t <- function(umap_dir, label_dir, label_key, label_cols, map_height = 1000, .
       class_val <- label_key[which(names(label_key) == input$label_class)] %>% unlist()
       
       raster::values(label_ras)[pix_to_class] <- class_val
+      
+      if (isTRUE(input$filter_noise)) {
+        f <-
+          raster::focal(label_ras,
+                        FUN = sum,
+                        na.rm = TRUE,
+                        w = matrix(1, 3, 3))
+        loners <- which(raster::values(f) == 1)
+        raster::values(label_ras)[loners] <- NA
+      }
+      
       raster::writeRaster(label_ras, lab_file, overwrite = TRUE)
     })
     
@@ -262,6 +273,13 @@ p2t <- function(umap_dir, label_dir, label_key, label_cols, map_height = 1000, .
           leaflet::clearGroup(group = 'Currently painted') %>%
           leaflet::clearGroup(group = 'Labeled') %>%
           leaflet::addRasterImage(
+            labs,
+            colors = label_cols,
+            project = TRUE,
+            group = 'Labeled',
+            method = 'ngb'
+          ) %>%
+          leaflet::addRasterImage(
             painted_ras(),
             color = tolower(input$paint_col),
             project = TRUE,
@@ -269,16 +287,8 @@ p2t <- function(umap_dir, label_dir, label_key, label_cols, map_height = 1000, .
             group = 'Currently painted',
             method = 'ngb'
           ) %>%
-          leaflet::addRasterImage(
-            labs,
-            colors = label_cols,
-            project = TRUE,
-            group = 'Labeled',
-            method = 'ngb'
-          ) %>%
           leaflet::addLayersControl(overlayGroups = c('Currently painted', 'Labeled'),
-                                    options = leaflet::layersControlOptions(collapsed = FALSE)) %>%
-          leaflet::hideGroup('Labeled')
+                                    options = leaflet::layersControlOptions(collapsed = FALSE)) 
         
       }
     )
