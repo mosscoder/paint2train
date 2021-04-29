@@ -31,7 +31,6 @@ tile_at_coords <-
       
     )
     
-    
     if (ncores > 1) {
       parallel::mclapply(
         FUN = function(x) {

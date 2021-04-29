@@ -1,26 +1,27 @@
-source('https://raw.githubusercontent.com/mosscoder/paint2train/main/R/tile_at_coords.R')
-source('https://raw.githubusercontent.com/mosscoder/paint2train/main/R/preproc_funs.R')
-#source('~/mpgPostdoc/projects/paint2train/R/tile_at_coords.R')
+# source('https://raw.githubusercontent.com/mosscoder/paint2train/main/R/tile_at_coords.R')
+# source('https://raw.githubusercontent.com/mosscoder/paint2train/main/R/umap_tile.R')
+# source('https://raw.githubusercontent.com/mosscoder/paint2train/main/R/preproc_funs.R')
+source('~/mpgPostdoc/projects/paint2train/R/tile_at_coords.R')
+source('~/mpgPostdoc/projects/paint2train/R/preproc_funs.R')
+source('~/mpgPostdoc/projects/paint2train/R/umap_tile.R')
+source('~/mpgPostdoc/projects/paint2train/R/p2t.R')
 library(raster)
+library(tidyverse)
 
 image_dir <- '/Volumes/mpg_data/rasters/High_Res_Mosaics/2020_4band_clip_NAD83.tif' #replace with path to any imagery
 setwd('~/Scratch') #where output directories will go
-raw_dir <- 'raw_tiles' #dir for raw tiles
 preproc_dir <- 'preproc_tiles' #dir for preprocessed tiles
 umap_dir <- 'umap_tiles' #dir for umap output
 lab_dir <- 'label_tiles' #dir for labeled tifs
 
-lapply(FUN = function(x){dir.create(x)}, X = c(raw_dir, preproc_dir, umap_dir, lab_dir))
+lapply(FUN = function(x){dir.create(x)}, X = c( preproc_dir, umap_dir, lab_dir))
 
 #some test coordinates
-xcoords <- c(728694.6722,
-             728268.3661,
-             727541.7446
-             )
+xcoords <- c(727495,
+             727919)
 
-ycoords <- c(5177076.413,
-             5176716.602,
-             5176541.735)
+ycoords <- c(5175339,
+             5175408)
 
 #bind into matrix
 coord_mat <- cbind(xcoords, ycoords)
@@ -33,16 +34,84 @@ cores <- 3 #how many processors to use, not tested outside of Unix systems
 tile_at_coords(coords = coord_mat, 
                len_side = ls, 
                buffer = buff,
-               out_dir = raw_dir,
+               out_dir = preproc_dir,
                img = image_dir, 
                ncores = cores)
 
 #show tiling outcome
-par(mfrow = c(1,3))              
-for(i in seq_along(xcoords)){plotRGB(stack(list.files(raw_dir, full.names = T)[i])[[1:3]])}
+par(mfrow = c(1,2))              
+for(i in seq_along(xcoords)){plotRGB(stack(list.files(preproc_dir, full.names = T)[i])[[1:3]])}
 par(mfrow = c(1,1))
 
-#derive additional features
+#derive additional features, NDVI and MSAVI
+parallel::mclapply(FUN = ndvi_msavi,
+                   X = list.files(preproc_dir, full.names = T),
+                   mc.cores = cores)
+
+#show ndvi
+par(mfrow = c(1,2))              
+for(i in seq_along(xcoords)){plot(stack(list.files(preproc_dir, full.names = T)[i])[[5]])}
+par(mfrow = c(1,1))
+
+#show msavi
+par(mfrow = c(1,3))              
+for(i in seq_along(xcoords)){plot(stack(list.files(preproc_dir, full.names = T)[i])[[6]])}
+par(mfrow = c(1,1))
+
+parallel::mclapply(FUN = sobel,
+                   X = list.files(preproc_dir, full.names = T),
+                   mc.cores = cores)
+
+#show edges for first pca axis
+par(mfrow = c(1,2))              
+for(i in seq_along(xcoords)){plot(stack(list.files(preproc_dir, full.names = T)[i])[[7]], col = gray.colors(100))}
+par(mfrow = c(1,1))
+
+parallel::mclapply(FUN = mean_var,
+                   X = list.files(preproc_dir, full.names = T),
+                   f_width = 1, #calculate mean and variance around 1m radius
+                   mc.cores = cores)
+
+#show mean first pca axis
+par(mfrow = c(1,2))              
+for(i in seq_along(xcoords)){plot(stack(list.files(preproc_dir, full.names = T)[i])[[10]])}
+par(mfrow = c(1,1))
+
+#show variance first pca axis
+par(mfrow = c(1,2))              
+for(i in seq_along(xcoords)){plot(stack(list.files(preproc_dir, full.names = T)[i])[[13]])}
+par(mfrow = c(1,1))
+
+#remove bufffers after preprocessing
+parallel::mclapply(FUN = remove_buffer,
+                   X = list.files(preproc_dir, full.names = T),
+                   b = buff,
+                   mc.cores = cores)
+
+#show example image after feature derivation
+band_names <- c('red','green','blue','nir',
+                'ndvi','msavi',
+                'sobel_pc1','sobel_pc2','sobel_pc3',
+                'mean_pc1','mean_pc2','mean_pc3',
+                'var_pc1','var_pc2','var_pc3')
+
+example_img <- stack(list.files(preproc_dir, full.names = T)[1])
+names(example_img) <- band_names
+plot(example_img)
+
+lapply(FUN = umap_tile,
+                   X = list.files(preproc_dir, full.names = TRUE),
+                   out_dir = umap_dir,
+                   n_threads = 25L,
+                   n_sgd_threads = 25L)
+
+
+lk <- list(Unknown = 0,
+           `Not canopy` = 1,
+           `Woody canopy` = 2)
+lc <- c('royalblue', 'tan', 'green')
+
+p2t(umap_dir = umap_dir, label_dir = lab_dir, label_key = lk, label_col = lc)
 
 
 

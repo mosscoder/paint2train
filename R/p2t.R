@@ -5,7 +5,7 @@ p2t <- function(umap_dir, label_dir, label_key, label_cols, map_height = 1000, .
   band_choices <- seq_len(band_count)
   lab_cols <- c('Black','Green','Blue','Red')
   
-  split_format <- tags$head(tags$style(HTML(".shiny-split-layout > div { overflow: visible; }")))
+  split_format <- shiny::tags$head(shiny::tags$style(htmltools::HTML(".shiny-split-layout > div { overflow: visible; }")))
   
   ui <- shiny::fluidPage(
     
@@ -49,12 +49,12 @@ p2t <- function(umap_dir, label_dir, label_key, label_cols, map_height = 1000, .
         inputId = 'img_qt',
         label = 'Image quantiles',
         ticks = FALSE,
-        value = c(0, 1),
+        value = c(0.02, 0.98),
         min = 0,
         max = 1
       ),
       
-      hr(),
+      shiny::hr(),
       
       shiny::sliderInput(
         inputId = 'thresh',
@@ -81,13 +81,21 @@ p2t <- function(umap_dir, label_dir, label_key, label_cols, map_height = 1000, .
         choices = names(label_key),
         selected = names(label_key)[0]
       ),
+      
       shinyWidgets::actionBttn(inputId = 'assign',
                                label = 'Assign painted to class',
                                color = 'primary', 
                                style = 'material-flat',
                                size = 'sm'),
+      shiny::hr(),
+      
+      shinyWidgets::actionBttn(inputId = 'fill_remainder',
+                               label = 'Fill unlabeled as class',
+                               color = 'danger', 
+                               style = 'material-flat',
+                               size = 'sm'),
    
-      hr(),
+      shiny::hr(),
       
       shiny::sliderInput(
         inputId = 'paint_op',
@@ -220,7 +228,7 @@ p2t <- function(umap_dir, label_dir, label_key, label_cols, map_height = 1000, .
       lab_file <- file.path(label_dir, basename(fname()))
       if(!file.exists(file.path(label_dir, basename(fname())))){
         label_ras <- umap_ras()[[1]]
-        raster::values(label_ras) <- 0
+        raster::values(label_ras) <- NA
         raster::writeRaster(label_ras, lab_file, overwrite = TRUE)
         }
     })
@@ -247,6 +255,18 @@ p2t <- function(umap_dir, label_dir, label_key, label_cols, map_height = 1000, .
       raster::writeRaster(label_ras, lab_file, overwrite = TRUE)
     })
     
+    observeEvent(input$fill_remainder,{
+      lab_file <- file.path(label_dir, basename(fname()))
+      label_ras <- raster::raster(lab_file)
+      
+      pix_to_class <- which(raster::values(is.na(label_ras)))
+      class_val <- label_key[which(names(label_key) == input$label_class)] %>% unlist()
+      
+      raster::values(label_ras)[pix_to_class] <- class_val
+      
+      raster::writeRaster(label_ras, lab_file, overwrite = TRUE)
+    })
+    
     shiny::observeEvent(
       c(
         input$img_sel,
@@ -268,20 +288,22 @@ p2t <- function(umap_dir, label_dir, label_key, label_cols, map_height = 1000, .
         
         labs <- raster::raster(file.path(label_dir, basename(fname())))
         
+        class_pal <- leaflet::colorNumeric(palette = label_cols, domain = label_key, na.color = 'transparent')
+        
         leaflet::leafletProxy(map = 'rgb_leaf') %>%
           leaflet::clearControls() %>%
           leaflet::clearGroup(group = 'Currently painted') %>%
           leaflet::clearGroup(group = 'Labeled') %>%
           leaflet::addRasterImage(
             labs,
-            colors = label_cols,
+            colors = class_pal,
             project = TRUE,
             group = 'Labeled',
             method = 'ngb'
           ) %>%
           leaflet::addRasterImage(
             painted_ras(),
-            color = tolower(input$paint_col),
+            color = input$paint_col,
             project = TRUE,
             opacity = input$paint_op,
             group = 'Currently painted',
