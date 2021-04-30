@@ -69,7 +69,7 @@ par(mfrow = c(1,1))
 
 parallel::mclapply(FUN = mean_var,
                    X = list.files(preproc_dir, full.names = T),
-                   f_width = 1, #calculate mean and variance around 1m radius
+                   f_width = c(0.25, 1, 3), #calculate mean and variance in 0.25m, 1m, and 3m neighborhoods
                    mc.cores = cores)
 
 #show mean first pca axis
@@ -88,22 +88,25 @@ parallel::mclapply(FUN = remove_buffer,
                    b = buff,
                    mc.cores = cores)
 
-#show example image after feature derivation
-band_names <- c('red','green','blue','nir',
-                'ndvi','msavi',
-                'sobel_pc1','sobel_pc2','sobel_pc3',
-                'mean_pc1','mean_pc2','mean_pc3',
-                'var_pc1','var_pc2','var_pc3')
-
+#Plot an example of all layers after preprocessing
 example_img <- stack(list.files(preproc_dir, full.names = T)[1])
-names(example_img) <- band_names
 plot(example_img)
 
+#Reduce data to three umap dimensions
 lapply(FUN = umap_tile,
                    X = list.files(preproc_dir, full.names = TRUE),
                    out_dir = umap_dir,
                    n_threads = 25L,
                    n_sgd_threads = 25L)
+
+#Display false color representation of three UMAP dimensions
+par(mfrow = c(1,2))              
+for(i in seq_along(xcoords)){
+  umap_st <- stack(list.files(umap_dir, full.names = T)[i])[[1:3]]
+  values(umap_st) <- scales::rescale(getValues(umap_st))
+  plotRGB(umap_st, scale = 1)
+  }
+par(mfrow = c(1,1))
 
 
 lk <- list(Unknown = 0,

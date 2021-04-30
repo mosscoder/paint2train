@@ -51,27 +51,44 @@ mean_var <- function(tile, axes = 3, f_width, fill_na = TRUE, ...){
   vals <- raster::getValues(t)
   
   pca <- stats::prcomp(vals, center = TRUE, scale. = TRUE)$x[,seq_len(axes), drop = FALSE]
-  mean_stack <- var_stack <- pca_stack <- t[[seq_len(axes)]]
-  
-  mat <- focalWeight(t, f_width, type=c('circle'))
-  
-  for(i in seq_len(axes)){
+  pca_stack <- t[[seq_len(axes)]]
+  for (i in seq_len(axes)) {
     raster::values(pca_stack[[i]]) <- pca[, i, drop = FALSE]
-    mean_stack[[i]] <- focal(pca_stack[[i]], 
-                             w = mat, 
-                             fun = mean,
-                             na.rm = TRUE, 
-                             pad = TRUE)
-    var_stack[[i]] <- focal(pca_stack[[i]], 
-                             w = mat, 
-                             fun = var,
-                             na.rm = TRUE,
-                             pad = TRUE )
+  }
+  f_grid <- expand.grid(width = f_width, 
+                        fun = c('mean','var'),
+                        pca_axis = seq_len(axes)) %>%
+    as.data.frame() %>%
+    arrange(fun, width, pca_axis)
+  
+  summary_stack <- replicate(t[[1]], n = nrow(f_grid))
+  
+  for(i in seq_len(nrow(f_grid))){
+    mat <- focalWeight(t, f_grid$width[i], type=c('circle'))
+    
+    if (f_grid$fun[i] == 'mean') {
+      summary_stack[[i]] <- focal(
+        pca_stack[[f_grid$pca_axis[i]]],
+        w = mat,
+        fun = mean,
+        na.rm = TRUE,
+        pad = TRUE
+      )
+    }
+    
+    if (f_grid$fun[i] == 'var') {
+      summary_stack[[i]] <- focal(
+        pca_stack[[f_grid$pca_axis[i]]],
+        w = mat,
+        fun = var,
+        na.rm = TRUE,
+        pad = TRUE
+      )
+    }
+    
   }
   
-  
-  
-  mv_added <- raster::stack(t, mean_stack, var_stack)
+  mv_added <- raster::stack(t, stack(summary_stack))
   raster::writeRaster(mv_added, tile, overwrite = TRUE)
 }
 

@@ -1,4 +1,5 @@
-p2t <- function(umap_dir, label_dir, label_key, label_cols, map_height = 1000, ...) {
+p2t <- function(umap_dir, label_dir, label_key, label_cols, map_height = 1000, 
+                r_band = 4, g_band = 5, b_band = 6, nir_band = 7, ...) {
   umap_files <- list.files(umap_dir, full.names = TRUE)
   targ_crs <- raster::crs(raster::raster(umap_files[1]))
   band_count <- raster::nlayers(raster::stack(umap_files[1]))
@@ -18,32 +19,45 @@ p2t <- function(umap_dir, label_dir, label_key, label_cols, map_height = 1000, .
         label = 'Select image',
         choices = basename(umap_files)
       ),
-
-      shiny::splitLayout(
-        split_format,
-        cellWidths = c('0%', '30%', '30%', '30%'),
-        shiny::selectInput(
-          inputId = 'b_1',
-          label = 'R band',
-          choices = band_choices,
-          selected = 3,
-          width = 100
+      
+      shiny::selectInput(inputId = 'image_type', label = 'Image color type',
+                  c(`UMAP axes` = 'umap', `True color` = 'true', `False color NIR` = 'false' ),
+                  selected = 'true'),
+      
+        
+        shiny::splitLayout(
+          split_format,
+          cellWidths = c('0%', '25%', '25%', '25%', '25%'),
+          shiny::selectInput(
+            inputId = 'b_1',
+            label = 'R band',
+            choices = band_choices,
+            selected = 4,
+            width = 100
+          ),
+          shiny::selectInput(
+            inputId = 'b_2',
+            label = 'G band',
+            choices = band_choices,
+            selected = 5,
+            width = 100
+          ),
+          shiny::selectInput(
+            inputId = 'b_3',
+            label = 'B band',
+            choices = band_choices,
+            selected = 6,
+            width = 100
+          ),
+          shiny::selectInput(
+            inputId = 'b_4',
+            label = 'NIR band',
+            choices = band_choices,
+            selected = 7,
+            width = 100
+          )
         ),
-        shiny::selectInput(
-          inputId = 'b_2',
-          label = 'G band',
-          choices = band_choices,
-          selected = 4,
-          width = 100
-        ),
-        shiny::selectInput(
-          inputId = 'b_3',
-          label = 'B band',
-          choices = band_choices,
-          selected = 5,
-          width = 100
-        )
-      ), 
+      
       
       shiny::sliderInput(
         inputId = 'img_qt',
@@ -63,7 +77,7 @@ p2t <- function(umap_dir, label_dir, label_key, label_cols, map_height = 1000, .
         value = 0.1,
         min = 0,
         max = 1,
-        step = 0.01
+        step = 0.005
       ),
       shinyWidgets::switchInput(
         inputId = 'filter_noise',
@@ -126,19 +140,35 @@ p2t <- function(umap_dir, label_dir, label_key, label_cols, map_height = 1000, .
     })
     
     rgb_ras <- shiny::reactive({
+      # print(input$b_1)
+      # print(input$b_2)
+      # print(input$b_3)
       base_st <- raster::stack(fname())
-      b1 <- base_st[[as.numeric(input$b_1)]]
-      b2 <- base_st[[as.numeric(input$b_2)]]
-      b3 <- base_st[[as.numeric(input$b_3)]]
-      leaflet::projectRasterForLeaflet( raster::stack(b1,b2,b3), method = 'ngb')
+      if(input$image_type == 'umap') {
+        r <- base_st[[1]]
+        g <- base_st[[2]]
+        b <- base_st[[3]]
+      }
+      if(input$image_type == 'true') {
+        r <- base_st[[as.numeric(input$b_1)]]
+        g <- base_st[[as.numeric(input$b_2)]]
+        b <- base_st[[as.numeric(input$b_3)]]
+      }
+      if(input$image_type == 'false') {
+        r <- base_st[[as.numeric(input$b_4)]]
+        g <- base_st[[as.numeric(input$b_2)]]
+        b <- base_st[[as.numeric(input$b_3)]]
+      }
+     
+      leaflet::projectRasterForLeaflet( raster::stack(r,g,b), method = 'ngb')
     })
     
     umap_ras <- shiny::reactive({
-      raster::stack(fname())[[1:2]]
+      raster::stack(fname())[[1:3]]
     })
     
     umap_pts <- shiny::reactive({
-      raster::rasterToPoints(umap_ras())[,3:4]
+      raster::rasterToPoints(umap_ras())[,3:5]
     })
     
     ras_qts <- shiny::reactive({
@@ -202,7 +232,8 @@ p2t <- function(umap_dir, label_dir, label_key, label_cols, map_height = 1000, .
         if (is.null(umap_vals()[1]) | is.na(umap_vals()[1]))
           return()
         udf <- data.frame(u1 = raster::values(umap_ras()[[1]]),
-                          u2 = raster::values(umap_ras())[[2]])
+                          u2 = raster::values(umap_ras()[[2]]),
+                          u3 = raster::values(umap_ras()[[3]]))
         
         dists <- RANN::nn2(data = umap_vals(),
                            query = umap_pts())$nn.dists %>% unlist()
@@ -279,7 +310,8 @@ p2t <- function(umap_dir, label_dir, label_key, label_cols, map_height = 1000, .
         input$b_1,
         input$b_2,
         input$b_3,
-        input$assign
+        input$assign,
+        input$image_type
       ),
       {
      
