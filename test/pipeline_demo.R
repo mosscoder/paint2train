@@ -99,8 +99,9 @@ lapply(FUN = umap_tile,
                    n_threads = 25L,
                    n_sgd_threads = 25L)
 
-#Display false color representation of three UMAP dimensions
-par(mfrow = c(1,2))              
+#Display false color representation of three UMAP dimensions compared with RGB channels
+par(mfrow = c(2,2))
+for(i in seq_along(xcoords)){plotRGB(stack(list.files(preproc_dir, full.names = T)[i])[[1:3]])}
 for(i in seq_along(xcoords)){
   umap_st <- stack(list.files(umap_dir, full.names = T)[i])[[1:3]]
   values(umap_st) <- scales::rescale(getValues(umap_st))
