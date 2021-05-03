@@ -54,7 +54,7 @@ for(i in seq_along(xcoords)){plot(stack(list.files(preproc_dir, full.names = T)[
 par(mfrow = c(1,1))
 
 #show msavi
-par(mfrow = c(1,3))              
+par(mfrow = c(1,2))              
 for(i in seq_along(xcoords)){plot(stack(list.files(preproc_dir, full.names = T)[i])[[6]])}
 par(mfrow = c(1,1))
 
@@ -69,7 +69,7 @@ par(mfrow = c(1,1))
 
 parallel::mclapply(FUN = mean_var,
                    X = list.files(preproc_dir, full.names = T),
-                   f_width = c(0.25, 1, 3), #calculate mean and variance in 0.25m, 1m, and 3m neighborhoods
+                   f_width = c(0.25, 0.5, 1), #calculate mean and variance in 0.25m, 0.5m, and 1 to 5 meter neighborhoods
                    mc.cores = cores)
 
 #show mean first pca axis
@@ -92,12 +92,14 @@ parallel::mclapply(FUN = remove_buffer,
 example_img <- stack(list.files(preproc_dir, full.names = T)[1])
 plot(example_img)
 
+cores_min_1 <- parallel::detectCores() - 1
+
 #Reduce data to three umap dimensions
 lapply(FUN = umap_tile,
                    X = list.files(preproc_dir, full.names = TRUE),
                    out_dir = umap_dir,
-                   n_threads = 25L,
-                   n_sgd_threads = 25L)
+                   n_threads = cores_min_1,
+                   n_sgd_threads = cores_min_1)
 
 #Display false color representation of three UMAP dimensions compared with RGB channels
 par(mfrow = c(2,2))
@@ -111,10 +113,11 @@ par(mfrow = c(1,1))
 
 
 lk <- list(Unknown = 0,
-           `Not canopy` = 1,
-           `Woody canopy` = 2)
+           `Not woody` = 1,
+           `Woody` = 2)
 lc <- c('royalblue', 'tan', 'green')
 
+source('~/mpgPostdoc/projects/paint2train/R/p2t.R')
 p2t(umap_dir = umap_dir, label_dir = lab_dir, label_key = lk, label_col = lc)
 
 
