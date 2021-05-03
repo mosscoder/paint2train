@@ -69,7 +69,7 @@ par(mfrow = c(1,1))
 
 parallel::mclapply(FUN = mean_var,
                    X = list.files(preproc_dir, full.names = T),
-                   f_width = c(0.25, 0.5, 1), #calculate mean and variance in 0.25m, 0.5m, and 1 to 5 meter neighborhoods
+                   f_width = c(0.25, 0.5, 1), #calculate mean and variance in 0.25m, 0.5m, and 1 meter neighborhoods
                    mc.cores = cores)
 
 #show mean first pca axis
