@@ -6,7 +6,7 @@ tile_at_coords <-
   function(coords, img, len_side, out_dir, buffer = 0, ncores = 1) {
     tile_ind <- seq_len(nrow(coords))
     
-    ext_list <- replicate(extent(0, 0, 0, 0),
+    ext_list <- replicate(raster::extent(0, 0, 0, 0),
                           n = length(tile_ind))
     
     half_side <- len_side / 2

@@ -7,7 +7,7 @@ p2t <- function(umap_dir, label_dir, label_key, label_cols,
   lab_cols <- c('Black','Green','Blue','Red')
   
   pf <- raster::raster(umap_files[1])[[1]]
-  values(pf) <- NA
+  raster::values(pf) <- NA
   paint_file <- file.path(label_dir, 'paint_in_prog.tif')
   raster::writeRaster(pf, paint_file, overwrite = TRUE)
   
@@ -293,7 +293,7 @@ p2t <- function(umap_dir, label_dir, label_key, label_cols,
         
     })
     
-    click_coords <- eventReactive(input$m1_leaf_click, {
+    click_coords <- shiny::eventReactive(input$m1_leaf_click, {
       click <- input$m1_leaf_click
       if (is.null(click))
         return()
@@ -307,7 +307,7 @@ p2t <- function(umap_dir, label_dir, label_key, label_cols,
       
     })
     
-    umap_vals <- eventReactive(input$m1_leaf_click, {
+    umap_vals <- shiny::eventReactive(input$m1_leaf_click, {
       if (is.null(click_coords()))
         return()
       vals <- raster::extract(umap_ras(), click_coords())
@@ -315,13 +315,13 @@ p2t <- function(umap_dir, label_dir, label_key, label_cols,
       vals
     })
     
-    observeEvent(input$img_sel, {
+    shiny::observeEvent(input$img_sel, {
       pf <- umap_ras()
-      values(pf) <- NA
+      raster::values(pf) <- NA
       raster::writeRaster(pf, paint_file, overwrite = TRUE)
       })
     
-    observe({
+    shiny::observe({
       lab_file <- file.path(label_dir, basename(fname()))
       if(!file.exists(lab_file)){
         label_ras <- umap_ras()[[1]]
@@ -330,7 +330,7 @@ p2t <- function(umap_dir, label_dir, label_key, label_cols,
       }
     })
     
-    observeEvent(c(input$m1_leaf_click, input$thresh) , {
+    shiny::observeEvent(c(input$m1_leaf_click, input$thresh) , {
       if (is.na(umap_vals()[1]))
         return()
       udf <- data.frame(u1 = raster::values(umap_ras()[[1]]),
@@ -347,7 +347,7 @@ p2t <- function(umap_dir, label_dir, label_key, label_cols,
       
     })
     
-    observeEvent(input$filter_noise, {
+    shiny::observeEvent(input$filter_noise, {
       painted_ras <-
         raster::raster(paint_file)
       
@@ -362,7 +362,7 @@ p2t <- function(umap_dir, label_dir, label_key, label_cols,
       raster::writeRaster(painted_ras, paint_file, overwrite = TRUE)
     })
     
-    observeEvent(input$assign,{
+    shiny::observeEvent(input$assign,{
       lab_file <- file.path(label_dir, basename(fname()))
       label_ras <- raster::raster(lab_file)
       painted_ras <- raster::raster(paint_file)
@@ -375,7 +375,7 @@ p2t <- function(umap_dir, label_dir, label_key, label_cols,
       raster::writeRaster(label_ras, lab_file, overwrite = TRUE)
     })
     
-    observeEvent(input$fill_remainder,{
+    shiny::observeEvent(input$fill_remainder,{
       lab_file <- file.path(label_dir, basename(fname()))
       label_ras <- raster::raster(lab_file)
       

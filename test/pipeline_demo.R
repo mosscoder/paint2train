@@ -1,20 +1,17 @@
-# source('https://raw.githubusercontent.com/mosscoder/paint2train/main/R/tile_at_coords.R')
-# source('https://raw.githubusercontent.com/mosscoder/paint2train/main/R/umap_tile.R')
-# source('https://raw.githubusercontent.com/mosscoder/paint2train/main/R/preproc_funs.R')
-source('~/mpgPostdoc/projects/paint2train/R/tile_at_coords.R')
-source('~/mpgPostdoc/projects/paint2train/R/preproc_funs.R')
-source('~/mpgPostdoc/projects/paint2train/R/umap_tile.R')
-source('~/mpgPostdoc/projects/paint2train/R/p2t.R')
 library(raster)
 library(tidyverse)
+library(paint2train)
 
-image_dir <- '/Volumes/mpg_data/rasters/High_Res_Mosaics/2020_4band_clip_NAD83.tif' #replace with path to any imagery
+#download some sample 4-band imagery
+image_dir <- tempfile()
+download.file(url = 'some_github_loc', destfile = image_dir)
+
 setwd('~/Scratch') #where output directories will go
 preproc_dir <- 'preproc_tiles' #dir for preprocessed tiles
 umap_dir <- 'umap_tiles' #dir for umap output
 lab_dir <- 'label_tiles' #dir for labeled tifs
 
-lapply(FUN = function(x){dir.create(x)}, X = c( preproc_dir, umap_dir, lab_dir))
+lapply(FUN = function(x){dir.create(x)}, X = c(preproc_dir, umap_dir, lab_dir))
 
 #some test coordinates
 xcoords <- c(727495,
@@ -28,7 +25,7 @@ coord_mat <- cbind(xcoords, ycoords)
 
 ls <- 30 #how big should the tiles be, this is the side length (in units of data, meters here)
 buff <- 5  #buffer in units of data
-cores <- 3 #how many processors to use, not tested outside of Unix systems
+cores <- 2 #how many processors to use, not tested outside of Unix systems
 
 #make 30m tiles with 5m buffer (to avoid edge effects during pre-processing)
 tile_at_coords(coords = coord_mat, 

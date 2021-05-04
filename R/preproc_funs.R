@@ -13,7 +13,7 @@ sobel <- function(tile, axes = 3, fill_na = TRUE, ...){
   
   if(isTRUE(fill_na)){
     for(i in seq_len(raster::nlayers(t))){
-      t[[i]] <- focal(t[[i]], matrix(1,3,3), fun="mean", na.rm=TRUE, NAonly=TRUE, pad=TRUE) 
+      t[[i]] <- raster::focal(t[[i]], matrix(1,3,3), fun="mean", na.rm=TRUE, NAonly=TRUE, pad=TRUE) 
     }
   }
   
@@ -30,8 +30,8 @@ sobel <- function(tile, axes = 3, fill_na = TRUE, ...){
   
   for(i in seq_len(axes)){
     raster::values(pca_stack[[i]]) <- pca[, i, drop = FALSE]
-    sx <- focal(pca_stack[[i]], w = sb_x_mat, na.rm = TRUE)
-    sy <- focal(pca_stack[[i]], w = sb_y_mat, na.rm = TRUE)
+    sx <- raster::focal(pca_stack[[i]], w = sb_x_mat, na.rm = TRUE)
+    sy <- raster::focal(pca_stack[[i]], w = sb_y_mat, na.rm = TRUE)
     sobel_stack[[i]] <- sqrt(sx^2 + sy^2)
   }
   
@@ -44,7 +44,7 @@ mean_var <- function(tile, axes = 3, f_width, fill_na = TRUE, ...){
   
   if(isTRUE(fill_na)){
     for(i in seq_len(raster::nlayers(t))){
-      t[[i]] <- focal(t[[i]], matrix(1,3,3), fun="mean", na.rm=TRUE, NAonly=TRUE, pad=TRUE) 
+      t[[i]] <- raster::focal(t[[i]], matrix(1,3,3), fun="mean", na.rm=TRUE, NAonly=TRUE, pad=TRUE) 
     }
   }
   
@@ -55,32 +55,36 @@ mean_var <- function(tile, axes = 3, f_width, fill_na = TRUE, ...){
   for (i in seq_len(axes)) {
     raster::values(pca_stack[[i]]) <- pca[, i, drop = FALSE]
   }
-  f_grid <- expand.grid(width = f_width, 
-                        fun = c('mean','var'),
-                        pca_axis = seq_len(axes)) %>%
-    as.data.frame() %>%
-    arrange(fun, width, pca_axis)
+  
+  f_grid <- expand.grid(c('mean','var'),
+                        f_width, 
+                        seq_len(axes)) %>%
+    as.data.frame()
+  colnames(f_grid) <- c('fun','width','pca_axis')
+  f_grid <- f_grid[order(f_grid[,1], 
+                         f_grid[,2],
+                         f_grid[,3]),]
   
   summary_stack <- replicate(t[[1]], n = nrow(f_grid))
   
   for(i in seq_len(nrow(f_grid))){
-    mat <- focalWeight(t, f_grid$width[i], type=c('circle'))
+    mat <- raster::focalWeight(t, f_grid$width[i], type=c('circle'))
     
     if (f_grid$fun[i] == 'mean') {
-      summary_stack[[i]] <- focal(
+      summary_stack[[i]] <- raster::focal(
         pca_stack[[f_grid$pca_axis[i]]],
         w = mat,
-        fun = mean,
+        fun = base::mean,
         na.rm = TRUE,
         pad = TRUE
       )
     }
     
     if (f_grid$fun[i] == 'var') {
-      summary_stack[[i]] <- focal(
+      summary_stack[[i]] <- raster::focal(
         pca_stack[[f_grid$pca_axis[i]]],
         w = mat,
-        fun = var,
+        fun = stats::var,
         na.rm = TRUE,
         pad = TRUE
       )
@@ -88,7 +92,7 @@ mean_var <- function(tile, axes = 3, f_width, fill_na = TRUE, ...){
     
   }
   
-  mv_added <- raster::stack(t, stack(summary_stack))
+  mv_added <- raster::stack(t, raster::stack(summary_stack))
   raster::writeRaster(mv_added, tile, overwrite = TRUE)
 }
 

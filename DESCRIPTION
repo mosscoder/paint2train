@@ -1,0 +1,30 @@
+Package: paint2train
+Title: Tools to label pixels
+Version: 0.0.0.9000
+Authors@R: 
+    person(given = "Doherty",
+           family = "Kyle",
+           role = c("aut", "cre"),
+           email = "kyledaviddoherty@gmail.com",
+           comment = c(ORCID = "0000-0002-3742-7839"))
+Description: What the package does (one paragraph).
+License: MIT + file LICENSE
+Encoding: UTF-8
+Language: es
+LazyData: true
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 7.1.1
+Imports: 
+    magrittr,
+    RANN,
+    htmltools,
+    leafem,
+    leaflet,
+    raster,
+    scales,
+    shiny,
+    sp,
+    stringr,
+    uwot
+Depends: 
+    R (>= 2.10)
