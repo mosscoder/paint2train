@@ -4,7 +4,12 @@ library(paint2train)
 
 #download some sample 4-band imagery
 image_dir <- tempfile()
-download.file(url = 'some_github_loc', destfile = image_dir)
+download.file(url = 'https://github.com/mosscoder/paint2train/blob/main/data/sample_4band.tif?raw=true', destfile = image_dir)
+
+par(mfrow = c(2,1))  
+plotRGB(raster::stack(image_dir)[[1:3]])
+plotRGB(raster::stack(image_dir)[[c(4,2,3)]])
+par(mfrow = c(1,1))  
 
 setwd('~/Scratch') #where output directories will go
 preproc_dir <- 'preproc_tiles' #dir for preprocessed tiles
