@@ -1,3 +1,4 @@
+#' @export
 #take matrix of coordinates (col. 1 x, col. 2 y) and a source image,
 #then generate tiles of specified side length
 #in units of image and put them in out_dir

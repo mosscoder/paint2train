@@ -1,6 +1,7 @@
+#' @export
 umap_tile <- function(tile, out_dir, scl = TRUE, ...){
   t <- raster::stack(tile)
-  tile_pts <- raster::rasterToPoints(t) #%>% na.omit()
+  tile_pts <- raster::rasterToPoints(t) 
   cells <- raster::cellFromXY(t, tile_pts[,1:2])
   in_dat <- tile_pts[, seq_len(raster::nlayers(t)) + 2]
   if(isTRUE(scl)){in_dat <- scale(in_dat)}

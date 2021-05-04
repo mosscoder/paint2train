@@ -1,3 +1,4 @@
+#' @export
 p2t <- function(umap_dir, label_dir, label_key, label_cols,
                 r_band = 4, g_band = 5, b_band = 6, nir_band = 7, ...) {
   umap_files <- list.files(umap_dir, full.names = TRUE)

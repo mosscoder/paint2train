@@ -1,3 +1,4 @@
+#' @export
 ndvi_msavi <- function(tile, r_band = 1, nir_band = 4){
   t <- raster::stack(tile)
   r <- t[[r_band]]
@@ -8,6 +9,7 @@ ndvi_msavi <- function(tile, r_band = 1, nir_band = 4){
   raster::writeRaster(diffs_added, tile, overwrite = TRUE)
 }
 
+#' @export
 sobel <- function(tile, axes = 3, fill_na = TRUE, ...){
   t <- raster::stack(tile)
   
@@ -39,6 +41,7 @@ sobel <- function(tile, axes = 3, fill_na = TRUE, ...){
   raster::writeRaster(sobel_added, tile, overwrite = TRUE)
 }
 
+#' @export
 mean_var <- function(tile, axes = 3, f_width, fill_na = TRUE, ...){
   t <- raster::stack(tile)
   
@@ -96,6 +99,7 @@ mean_var <- function(tile, axes = 3, f_width, fill_na = TRUE, ...){
   raster::writeRaster(mv_added, tile, overwrite = TRUE)
 }
 
+#' @export
 remove_buffer <- function(tile, b){
   t <- raster::stack(tile)
   buff_e <- raster::extent(t)
