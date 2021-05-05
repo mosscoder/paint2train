@@ -10,7 +10,7 @@ download.file(url = 'https://github.com/mosscoder/paint2train/blob/main/data/sam
 par(mfrow = c(2,1))  
 plotRGB(stack(image_dir)[[1:3]], main = 'True color')
 plotRGB(stack(image_dir)[[c(4,2,3)]], main = 'NIR false color')
-mtext("15cm true and NIR false color imagery", side = 3, line = -1, outer = TRUE)
+#mtext("15cm true and NIR false color imagery", side = 3, line = -1, outer = TRUE)
 par(mfrow = c(1,1))  
 
 tdir <- tempdir()
@@ -106,7 +106,7 @@ mclapply(FUN = remove_buffer,
 # Plot neighborhood calculations after preprocessing for first tile
 example_img <- stack(list.files(preproc_dir, full.names = T)[1])
 neighb_inds <- 10:nlayers(example_img)
-plot(example_img[[neighb_inds]], main = 'Output from mean and variance neighborhood calcs')
+plot(example_img[[neighb_inds]])
 
 # Reduce data to three umap dimensions, 
 # Note you can pass in further arguments to ?uwot::umap
@@ -123,7 +123,7 @@ for(i in seq_along(xcoords)){
   umap_st <- stack(list.files(umap_dir, full.names = T)[i])[[1:3]]
   values(umap_st) <- rescale(getValues(umap_st))
   plotRGB(umap_st, scale = 1)
-  mtext("Original tiles and corresponding UMAP values\nrepresented in similarity colors", side = 3, line = -3, outer = TRUE, col = 'lightgreen')
+  #mtext("Original tiles and corresponding UMAP values\nrepresented in similarity colors", side = 3, line = -3, outer = TRUE, col = 'lightgreen')
   }
 par(mfrow = c(1,1))
 
