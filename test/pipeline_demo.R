@@ -51,7 +51,7 @@ tile_at_coords(coords = coord_mat,
 #show tiling outcome
 par(mfrow = c(1,2))              
 for(i in seq_along(xcoords)){plotRGB(stack(list.files(preproc_dir, full.names = T)[i])[[1:3]])}
-mtext("The two tiles we will focus on", side = 3, line = -1, outer = TRUE)
+#mtext("The two tiles we will focus on", side = 3, line = -1, outer = TRUE)
 par(mfrow = c(1,1))
 
 #derive additional features, NDVI and MSAVI
