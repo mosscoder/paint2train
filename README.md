@@ -11,7 +11,7 @@ train machine learning algorithms for tasks such as image segmentation.
 
 There are currently four primary functions:
 
-  - Generate tiles from larger contigous sources of multi-spectral
+  - Generate tiles from larger contiguous sources of multi-spectral
     imagery or other spatial data
   - Pre-process tiles, generating normalized difference, edge detection,
     and neighborhood summary stats layers
