@@ -1,0 +1,37 @@
+---
+title: "paint2train documentation"
+author: "Kyle Doherty"
+date: "5/5/2021"
+output:
+  html_document:
+    df_print: paged
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Background
+
+The purpose of paint2train package is to facilitate imagery and spatial data labeling at the pixel level. These labels may in turn be used to train machine learning algorithms for tasks such as image segmentation. T
+
+There are currently four primary functions:
+
+* Generate tiles from larger contigous sources of multi-spectral imagery
+* Preprocess tiles, generating normalized difference, edge detection, and neighborhood summary stats layers
+* Reduce n layers in each preprocessed tile into 3 layers, using [UMAP](https://github.com/jlmelville/uwot)
+* Paint pixels in a shiny app which identifies similar pixels in UMAP space and label them, saving labels in .tifs
+
+```{r cars}
+summary(cars)
+```
+
+## Including Plots
+
+You can also embed plots, for example:
+
+```{r pressure, echo=FALSE}
+plot(pressure)
+```
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.

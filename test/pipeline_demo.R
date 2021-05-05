@@ -15,6 +15,7 @@ par(mfrow = c(1,1))
 
 tdir <- tempdir()
 setwd(tdir) #where output directories will go
+file.remove(list.files(tdir, full.names = TRUE, recursive = TRUE)) 
 preproc_dir <- 'preproc_tiles' #dir for preprocessed tiles
 umap_dir <- 'umap_tiles' #dir for umap output
 lab_dir <- 'label_tiles' #dir for labeled tifs
@@ -182,7 +183,6 @@ tile_at_coords(coords = cbind(mean_x, mean_y - 25),
                ncores = pre_cores)
 
 pred_files <- list.files(pred_dir, full.names = TRUE)
-#file.remove(pred_files)
 
 pre_pipeline <- function(x, fs, b) {
   ndvi_msavi(x)
@@ -221,14 +221,4 @@ leaflet() %>%
                  group = 'Canopy') %>%
   addLayersControl(overlayGroups = c('Canopy'), 
                    options = layersControlOptions(collapsed = FALSE))
-
-
-
-
-
-
-
-
-
-
 
