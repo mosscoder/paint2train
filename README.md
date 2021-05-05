@@ -17,8 +17,10 @@ There are currently four primary functions:
     and neighborhood summary stats layers
   - Reduce n layers from pre-processing step into 3 layers, using [UMAP
     dimension reduction methods](https://github.com/jlmelville/uwot)
-  - Paint pixels in a Shiny app which identifies similar pixels in UMAP
-    space and label them, saving labels in .tifs
+  - Shiny app to rapidly label pixels based on similarity thresholds (in
+    UMAP space) to clicked points (labels are saved as .tifs as you
+    work; [demo of app
+    here](https://mpgranch.shinyapps.io/paint2train_sandbox/))
 
 ## Installation
 
