@@ -5,8 +5,8 @@ paint2train package
 
 ## Background
 
-The purpose of paint2train package is to facilitate imagery and spatial
-data labeling at the pixel level. These labels may in turn be used to
+The purpose of paint2train package is to rapidly label imagery and
+spatial data at the pixel level. These labels may in turn be used to
 train machine learning algorithms for tasks such as image segmentation.
 
 There are currently four primary functions:
