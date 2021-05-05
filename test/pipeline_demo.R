@@ -19,8 +19,9 @@ file.remove(list.files(tdir, full.names = TRUE, recursive = TRUE))
 preproc_dir <- 'preproc_tiles' #dir for preprocessed tiles
 umap_dir <- 'umap_tiles' #dir for umap output
 lab_dir <- 'label_tiles' #dir for labeled tifs
+pred_dir <- 'pred_dir' #a place to predict to new data 
 
-lapply(FUN = function(x){dir.create(x)}, X = c(preproc_dir, umap_dir, lab_dir))
+lapply(FUN = function(x){dir.create(x)}, X = c(preproc_dir, umap_dir, lab_dir, pred_dir))
 
 #some test coordinates
 xcoords <- c(727495,
@@ -63,13 +64,11 @@ mclapply(
 #show ndvi
 par(mfrow = c(1,2))              
 for(i in seq_along(xcoords)){plot(stack(list.files(preproc_dir, full.names = T)[i])[[5]])}
-mtext("NDVI", side = 3, line = -1, outer = TRUE)
 par(mfrow = c(1,1))
 
 #show msavi
 par(mfrow = c(1,2))              
 for(i in seq_along(xcoords)){plot(stack(list.files(preproc_dir, full.names = T)[i])[[6]])}
-mtext("MSAVI", side = 3, line = -1, outer = TRUE)
 par(mfrow = c(1,1))
 
 #perform edge detection on the first 3 PCA axes of initial 4 bands, ndvi, and msavi
@@ -82,7 +81,7 @@ mclapply(
 #Show edges for first PCA axis
 par(mfrow = c(1,2))              
 for(i in seq_along(xcoords)){plot(stack(list.files(preproc_dir, full.names = T)[i])[[7]], col = gray.colors(100))}
-mtext("PCA axis 1 Sobel values", side = 3, line = -1, outer = TRUE)
+#mtext("PCA axis 1 Sobel values", side = 3, line = -1, outer = TRUE)
 par(mfrow = c(1,1))
 
 #Next calculate mean and variance in 0.25, 0.5, and 1 meter neighborhoods
@@ -172,8 +171,6 @@ print(rf_mod)
 og_ext <- extent(stack(image_dir))
 mean_x <- mean(og_ext[1:2])
 mean_y <- mean(og_ext[3:4])
-pred_dir <- 'pred_dir'
-dir.create(pred_dir)
 
 tile_at_coords(coords = cbind(mean_x, mean_y - 25), 
                len_side = 25, 
