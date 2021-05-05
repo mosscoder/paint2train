@@ -14,8 +14,9 @@ Language: es
 LazyData: true
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.1.1
-Imports: 
+Depends: 
     magrittr,
+    parallel,
     RANN,
     htmltools,
     leafem,
@@ -25,6 +26,5 @@ Imports:
     shiny,
     sp,
     stringr,
-    uwot
-Depends: 
+    uwot,
     R (>= 2.10)
