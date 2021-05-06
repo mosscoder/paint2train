@@ -17,9 +17,9 @@ There are currently four primary functions:
     and neighborhood summary stats layers
   - Reduce n layers from pre-processing step into 3 layers, using [UMAP
     dimension reduction methods](https://github.com/jlmelville/uwot)
-  - Shiny app to rapidly label pixels based on dissimilarity thresholds
-    (in UMAP space) to clicked points (labels are saved as .tifs as you
-    work; [demo of app
+  - Run a local Shiny app to rapidly label pixels based on dissimilarity
+    thresholds (in UMAP space) to clicked points (labels are saved as
+    .tifs as you work; [demo of app
     here](https://mpgranch.shinyapps.io/paint2train_sandbox/))
 
 ## Installation
@@ -39,7 +39,8 @@ library(paint2train)
 library(ranger)
 
 image_dir <- tempfile()
-download.file(url = 'https://github.com/mosscoder/paint2train/blob/main/data/sample_4band.tif?raw=true', destfile = image_dir)
+URL <- 'https://github.com/mosscoder/paint2train/blob/main/data/sample_4band.tif?raw=true'
+download.file(url = URL, destfile = image_dir)
 
 par(mfrow = c(2,1))  
 plotRGB(stack(image_dir)[[1:3]], main = 'True color')
@@ -60,7 +61,8 @@ umap_dir <- 'umap_tiles' #dir for UMAP output
 lab_dir <- 'label_tiles' #dir for labeled .tif
 pred_dir <- 'pred_dir' #a place to predict to new data 
 
-lapply(FUN = function(x){dir.create(x)}, X = c(preproc_dir, umap_dir, lab_dir, pred_dir))
+lapply(FUN = function(x){dir.create(x)}, 
+       X = c(preproc_dir, umap_dir, lab_dir, pred_dir))
 ```
 
 ## Tiling and Pre-processing
@@ -115,8 +117,8 @@ mclapply(
 <img src="https://github.com/mosscoder/paint2train/blob/main/images/ndvi.png?raw=true" width="100%" />
 … and MSAVI values at tiles.
 <img src="https://github.com/mosscoder/paint2train/blob/main/images/msavi.png?raw=true" width="100%" />
-Next, derive Sobel values (edge detection) for the first 3 PCA axes of
-data generated thus far.
+Now create edge detection layers by applying a Sobel filter across the
+first 3 PCA axes of data generated thus far.
 
 ``` r
 mclapply(
@@ -177,7 +179,7 @@ Compare the original RGB tiles with outcomes from pre-processing and
 dimension reduction. UMAP space is represented in similarity colors.
 <img src="https://github.com/mosscoder/paint2train/blob/main/images/umap_example.png?raw=true" width="100%" />
 
-## Labeling Data
+## Running Local App
 
 Now we may label our data using the paint2train app. We first define the
 classes to label, assigning them an integer value, as well as a
@@ -202,6 +204,10 @@ p2t(umap_dir = umap_dir,
     label_key = label_key, 
     label_col = pal)
 ```
+
+## Data Labeling Process
+
+*working on docs*
 
 ## Model Training
 
