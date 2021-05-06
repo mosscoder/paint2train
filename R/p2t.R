@@ -16,6 +16,8 @@ p2t <- function(umap_dir, label_dir, label_key, label_cols,
   abs_style <- "background:white; padding: 20px 20px 20px 20px; border-radius: 5pt;"
   
   ui <- shiny::fillPage(
+    shiny::tags$style('.leaflet-container { cursor: auto !important; }' ),
+    
     leaflet::leafletOutput('m1_leaf', height = '100vh'),
     
     shiny::absolutePanel(

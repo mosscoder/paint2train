@@ -38,6 +38,8 @@ split_format <- shiny::tags$head(shiny::tags$style(htmltools::HTML(".shiny-split
 abs_style <- "background:white; padding: 20px 20px 20px 20px; border-radius: 5pt;"
 
 ui <- shiny::fillPage(
+  shiny::tags$style('.leaflet-container { cursor: auto !important; }' ),
+  
   leaflet::leafletOutput('m1_leaf', height = '100vh'),
   
   shiny::absolutePanel(
