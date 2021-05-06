@@ -114,7 +114,7 @@ ui <- shiny::fillPage(
                     
                     shiny::sliderInput(
                       inputId = 'img_qt_1',
-                      label = 'Map 1 quantiles',
+                      label = 'Baselayer quantiles',
                       ticks = FALSE,
                       value = c(0.02, 0.98),
                       min = 0,

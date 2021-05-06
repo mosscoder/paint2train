@@ -15,7 +15,7 @@ There are currently four primary functions:
     imagery or other spatial data
   - Pre-process tiles, generating normalized difference, edge detection,
     and neighborhood summary stats layers
-  - Reduce n layers from pre-processing step into 3 layers, using [UMAP
+  - Reduce n layers from pre-processing steps into 3 layers, using [UMAP
     dimension reduction methods](https://github.com/jlmelville/uwot)
   - Run a local Shiny app to rapidly label pixels based on dissimilarity
     thresholds (in UMAP space) to clicked points (labels are saved as
@@ -179,7 +179,7 @@ Compare the original RGB tiles with outcomes from pre-processing and
 dimension reduction. UMAP space is represented in similarity colors.
 <img src="https://github.com/mosscoder/paint2train/blob/main/images/umap_example.png?raw=true" width="100%" />
 
-## Running Local App
+## Running App Locally
 
 Now we may label our data using the paint2train app. We first define the
 classes to label, assigning them an integer value, as well as a
@@ -207,7 +207,33 @@ p2t(umap_dir = umap_dir,
 
 ## Data Labeling Process
 
-*working on docs*
+Select imagery tiles from the dropdown menu found in the upper left.
+<img src="https://github.com/mosscoder/paint2train/blob/main/images/image_select.gif?raw=true" width="100%" />
+
+Click on a region you wish to classify and adjust the **Dissimilarity
+Threshold** to match the extent of the class to label.
+<img src="https://github.com/mosscoder/paint2train/blob/main/images/click_paint.gif?raw=true" width="100%" />
+
+Select which class to label from the **Labeling Tools** menu, then click
+the **Label painted areas** button to save the painted pixels to that
+class. After painting and labeling focal areas, fill the remaining
+unlabeled points by click the **FIll unlabeled as class** button.
+<img src="https://github.com/mosscoder/paint2train/blob/main/images/label_class.gif?raw=true" width="100%" />
+
+Adjust the color of painted areas from the **Aethetics Controls** drop
+down menu.
+<img src="https://github.com/mosscoder/paint2train/blob/main/images/change_paint.gif?raw=true" width="100%" />
+
+Change the base imagery with the controls in the upper right.
+<img src="https://github.com/mosscoder/paint2train/blob/main/images/base_select.gif?raw=true" width="100%" />
+
+Filter high and low value outlier pixels to brighten or darken base
+imagery layers by adjusting the **Baselayer quantiles** in the
+**Aesthetics controls** drop down menu.
+<img src="https://github.com/mosscoder/paint2train/blob/main/images/quantiles.gif?raw=true" width="100%" />
+
+Click and drag to move the controls as needed.
+<img src="https://github.com/mosscoder/paint2train/blob/main/images/move_controls.gif?raw=true" width="100%" />
 
 ## Model Training
 

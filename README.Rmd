@@ -148,7 +148,7 @@ Compare the original RGB tiles with outcomes from pre-processing and dimension r
 knitr::include_graphics("https://github.com/mosscoder/paint2train/blob/main/images/umap_example.png?raw=true")
 ```
 
-## Running Local App
+## Running App Locally
 Now we may label our data using the paint2train app. We first define the classes to label, assigning them an integer value, as well as a corresponding color palette to visualize labeled areas. 
 ```{r, eval = FALSE}
 label_key <- list(Unknown = 0,
@@ -169,7 +169,40 @@ p2t(umap_dir = umap_dir,
 ```
 
 ## Data Labeling Process
-*working on docs*
+Select imagery tiles from the dropdown menu found in the upper left. 
+```{r, echo=FALSE, out.width="100%"}
+knitr::include_graphics("https://github.com/mosscoder/paint2train/blob/main/images/image_select.gif?raw=true")
+```
+
+Click on a region you wish to classify and adjust the **Dissimilarity Threshold** to match the extent of the class to label. 
+```{r, echo=FALSE, out.width="100%"}
+knitr::include_graphics("https://github.com/mosscoder/paint2train/blob/main/images/click_paint.gif?raw=true")
+```
+
+Select which class to label from the **Labeling Tools** menu, then click the **Label painted areas** button to save the painted pixels to that class. After painting and labeling focal areas, fill the remaining unlabeled points by click the **FIll unlabeled as class** button.
+```{r, echo=FALSE, out.width="100%"}
+knitr::include_graphics("https://github.com/mosscoder/paint2train/blob/main/images/label_class.gif?raw=true")
+```
+
+Adjust the color of painted areas from the **Aethetics Controls** drop down menu.
+```{r, echo=FALSE, out.width="100%"}
+knitr::include_graphics("https://github.com/mosscoder/paint2train/blob/main/images/change_paint.gif?raw=true")
+```
+
+Change the base imagery with the controls in the upper right. 
+```{r, echo=FALSE, out.width="100%"}
+knitr::include_graphics("https://github.com/mosscoder/paint2train/blob/main/images/base_select.gif?raw=true")
+```
+
+Filter high and low value outlier pixels to brighten or darken base imagery layers by adjusting the **Baselayer quantiles** in the **Aesthetics controls** drop down menu. 
+```{r, echo=FALSE, out.width="100%"}
+knitr::include_graphics("https://github.com/mosscoder/paint2train/blob/main/images/quantiles.gif?raw=true")
+```
+
+Click and drag to move the controls as needed.
+```{r, echo=FALSE, out.width="100%"}
+knitr::include_graphics("https://github.com/mosscoder/paint2train/blob/main/images/move_controls.gif?raw=true")
+```
 
 ## Model Training
 Now generate a simple random forest model using the data labeled with p2t.
