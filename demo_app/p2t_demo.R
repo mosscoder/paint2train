@@ -141,7 +141,7 @@ ui <- shiny::fillPage(
                       ticks = FALSE,
                       value = 1,
                       min = 0,
-                      pimax = 1,
+                      max = 1,
                       step = 0.01
                     ),
                     

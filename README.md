@@ -104,7 +104,7 @@ tile_at_coords(coords = coord_mat,
 ```
 
 <img src="https://github.com/mosscoder/paint2train/blob/main/images/focal_tiles_rgb.png?raw=true" width="100%" />
-Now generate NDVI…
+Generate NDVI…
 
 ``` r
 mclapply(
@@ -117,8 +117,8 @@ mclapply(
 <img src="https://github.com/mosscoder/paint2train/blob/main/images/ndvi.png?raw=true" width="100%" />
 … and MSAVI values at tiles.
 <img src="https://github.com/mosscoder/paint2train/blob/main/images/msavi.png?raw=true" width="100%" />
-Now create edge detection layers by applying a Sobel filter across the
-first 3 PCA axes of data generated thus far.
+Create edge detection layers by applying a Sobel filter across the first
+three PCA axes of data generated thus far.
 
 ``` r
 mclapply(
@@ -129,10 +129,10 @@ mclapply(
 ```
 
 <img src="https://github.com/mosscoder/paint2train/blob/main/images/sobel.png?raw=true" width="100%" />
-Next calculate mean and variance in 0.25, 0.5, and 1 meter neighborhoods
-for first three PCA axes of data generated up to this point. The extents
-of these neighborhoods are a critical tuning parameter that will need to
-be paired with a particular dataset and modeling objective.
+Calculate mean and variance in 0.25, 0.5, and 1 meter neighborhoods for
+first three PCA axes of data generated up to this point. The extents of
+these neighborhoods are a critical tuning parameter that will need to be
+paired with a particular dataset and modeling objective.
 
 ``` r
 neighborhoods <- c(0.25, 0.5, 1) #neighborhood radii in units of imagery
@@ -195,8 +195,8 @@ pal <- list('royalblue',
          'green')
 ```
 
-Now provide these lists, location of the UMAP output and label directory
-to the p2t function.
+Provide these lists, location of the UMAP output, and label directory to
+the p2t function.
 
 ``` r
 p2t(umap_dir = umap_dir, 
