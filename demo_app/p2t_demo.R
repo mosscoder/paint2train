@@ -23,16 +23,11 @@ b_band = 6
 nir_band = 7
 
 umap_files <- list.files(umap_dir, full.names = TRUE)
-file.remove(list.files(label_dir, full.names = TRUE))
+
 targ_crs <- raster::crs(raster::raster(umap_files[1]))
 band_count <- raster::nlayers(raster::stack(umap_files[1]))
 band_choices <- seq_len(band_count)
 lab_cols <- c('Black','Green','Blue','Red')
-
-pf <- raster::raster(umap_files[1])[[1]]
-values(pf) <- NA
-paint_file <- file.path(label_dir, 'paint_in_prog.tif')
-raster::writeRaster(pf, paint_file, overwrite = TRUE)
 
 split_format <- shiny::tags$head(shiny::tags$style(htmltools::HTML(".shiny-split-layout > div { overflow: visible; }")))
 abs_style <- "background:white; padding: 20px 20px 20px 20px; border-radius: 5pt;"
@@ -194,6 +189,13 @@ ui <- shiny::fillPage(
 
 
 server <- function(input, output, session) {
+  file.remove(list.files(label_dir, full.names = TRUE))
+  pf <- raster::raster(umap_files[1])[[1]]
+  values(pf) <- NA
+  time <- Sys.time() %>% str_remove_all('-') %>% str_remove_all(' ') %>% str_remove_all(':')
+  paint_file <- file.path(label_dir, paste0(time,'_paint_in_prog.tif'))
+  
+  raster::writeRaster(pf, paint_file, overwrite = TRUE)
   
   showModal(modalDialog(includeMarkdown("www/in_app_docs.md"),
                         size = 'l', easyClose = T, footer = NULL))
