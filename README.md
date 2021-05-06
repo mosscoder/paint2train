@@ -220,7 +220,7 @@ class. After painting and labeling focal areas, fill the remaining
 unlabeled points by click the **FIll unlabeled as class** button.
 <img src="https://github.com/mosscoder/paint2train/blob/main/images/label_class.gif?raw=true" width="100%" />
 
-Adjust the color of painted areas from the **Aethetics Controls** drop
+Adjust the color of painted areas from the **Aesthetics Controls** drop
 down menu.
 <img src="https://github.com/mosscoder/paint2train/blob/main/images/change_paint.gif?raw=true" width="100%" />
 

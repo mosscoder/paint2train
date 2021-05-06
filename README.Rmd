@@ -184,7 +184,7 @@ Select which class to label from the **Labeling Tools** menu, then click the **L
 knitr::include_graphics("https://github.com/mosscoder/paint2train/blob/main/images/label_class.gif?raw=true")
 ```
 
-Adjust the color of painted areas from the **Aethetics Controls** drop down menu.
+Adjust the color of painted areas from the **Aesthetics Controls** drop down menu.
 ```{r, echo=FALSE, out.width="100%"}
 knitr::include_graphics("https://github.com/mosscoder/paint2train/blob/main/images/change_paint.gif?raw=true")
 ```
