@@ -14,7 +14,7 @@ There are currently four primary functions:
 * Generate tiles from larger contiguous sources of multi-spectral imagery or other spatial data
 * Pre-process tiles, generating normalized difference, edge detection, and neighborhood summary stats layers
 * Reduce n layers from pre-processing step into 3 layers, using [UMAP dimension reduction methods](https://github.com/jlmelville/uwot)
-* Shiny app to rapidly label pixels based on similarity thresholds (in UMAP space) to clicked points (labels are saved as .tifs as you work; [demo of app here](https://mpgranch.shinyapps.io/paint2train_sandbox/)) 
+* Shiny app to rapidly label pixels based on dissimilarity thresholds (in UMAP space) to clicked points (labels are saved as .tifs as you work; [demo of app here](https://mpgranch.shinyapps.io/paint2train_sandbox/)) 
 
 ## Installation 
 The package may be installed via github. 

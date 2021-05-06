@@ -139,7 +139,7 @@ p2t <- function(umap_dir, label_dir, label_key, label_cols,
                              shiny::h2("Labeling Tools"),
                              shiny::sliderInput(
                                inputId = 'thresh',
-                               label = 'Similarity threshold',
+                               label = 'Dissimilarity threshold',
                                ticks = FALSE,
                                value = 0.1,
                                min = 0,

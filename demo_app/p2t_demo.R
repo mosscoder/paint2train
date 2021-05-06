@@ -161,7 +161,7 @@ ui <- shiny::fillPage(
                        shiny::h2("Labeling Tools"),
                        shiny::sliderInput(
                          inputId = 'thresh',
-                         label = 'Similarity threshold',
+                         label = 'Dissimilarity threshold',
                          ticks = FALSE,
                          value = 0.1,
                          min = 0,

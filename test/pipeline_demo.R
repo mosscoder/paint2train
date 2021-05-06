@@ -213,7 +213,7 @@ leaflet() %>%
                group = 'RGB') %>%
   addRasterImage(pred_ras,
                  project = FALSE,
-                 opacity = 1,
+                 opacity = 0.6,
                  colors = c('transparent','red'),
                  group = 'Canopy') %>%
   addLayersControl(overlayGroups = c('Canopy'), 
