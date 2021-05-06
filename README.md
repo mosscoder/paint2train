@@ -1,7 +1,7 @@
 paint2train package
 ================
 
-<img src="https://github.com/mosscoder/paint2train/blob/main/images/intro_banner.png?raw=true" width="100%" />
+<img src="https://github.com/mosscoder/paint2train/blob/main/images/banner.png?raw=true" width="100%" />
 
 ## Background
 
@@ -17,8 +17,8 @@ There are currently four primary functions:
     and neighborhood summary stats layers
   - Reduce n layers from pre-processing step into 3 layers, using [UMAP
     dimension reduction methods](https://github.com/jlmelville/uwot)
-  - Shiny app to rapidly label pixels based on similarity thresholds (in
-    UMAP space) to clicked points (labels are saved as .tifs as you
+  - Shiny app to rapidly label pixels based on dissimilarity thresholds
+    (in UMAP space) to clicked points (labels are saved as .tifs as you
     work; [demo of app
     here](https://mpgranch.shinyapps.io/paint2train_sandbox/))
 
@@ -170,7 +170,7 @@ documentation](https://github.com/jlmelville/uwot).
 mclapply(FUN = umap_tile,
                    X = list.files(preproc_dir, full.names = T),
                    b = buff,
-                   mc.cores = pre_cores)
+                   mc.cores = umap_cores)
 ```
 
 Compare the original RGB tiles with outcomes from pre-processing and
@@ -188,7 +188,7 @@ label_key <- list(Unknown = 0,
            `Not woody` = 1,
            `Woody` = 2)
 
-pal <- c('royalblue', 
+pal <- list('royalblue', 
          'tan', 
          'green')
 ```
@@ -203,24 +203,15 @@ p2t(umap_dir = umap_dir,
     label_col = pal)
 ```
 
-## Modeling With Labeled Data
+## Model Training
 
 Now generate a simple random forest model using the data labeled with
 p2t.
 
 ``` r
-train_dat <- do.call(rbind, lapply(
-  FUN = function(x) {
-    labels <- raster(file.path(lab_dir, x))
-    predictors <- stack(file.path(preproc_dir, x))
-    train_stack <- stack(labels, predictors)
-    train_vals <- getValues(train_stack)
-    pred_names <- c('label', paste0('X_', seq_len(nlayers(train_stack) - 1)))
-    colnames(train_vals) <- pred_names
-    return(as.data.frame(train_vals))
-  },
-  X = list.files(lab_dir)
-))
+train_dat <- load_tdat(preproc_dir = preproc_dir,
+                       label_dir = lab_dir,
+                       ncores = pre_cores)
 
 set.seed(123)
 rf_mod <- ranger(label ~ ., 
