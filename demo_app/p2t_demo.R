@@ -193,6 +193,9 @@ ui <- shiny::fillPage(
 
 server <- function(input, output, session) {
   
+  showModal(modalDialog(includeMarkdown("www/in_app_docs.md"),
+                        size = 'l', easyClose = T, footer = NULL))
+  
   fname <- shiny::reactive({
     file_ind <- which(basename(umap_files) == input$img_sel)
     umap_files[file_ind]
