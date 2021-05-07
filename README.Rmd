@@ -138,10 +138,11 @@ knitr::include_graphics("https://github.com/mosscoder/paint2train/blob/main/imag
 ## Dimension Reduction
 Next reduce the pre-processed layers into three dimension with the UMAP algorithm. This will facilitate identification of similar pixels in the painting app by conducting non-linear transformations of the data and mitigate the [curse of dimensionality](https://en.wikipedia.org/wiki/Curse_of_dimensionality). For details on this method, please refer to the [UWOT documentation](https://github.com/jlmelville/uwot).
 ```{r, eval = FALSE}
-mclapply(FUN = umap_tile,
-                   X = list.files(preproc_dir, full.names = T),
-                   b = buff,
-                   mc.cores = umap_cores)
+lapply(FUN = umap_tile,
+                   X = list.files(preproc_dir, full.names = TRUE),
+                   out_dir = umap_dir,
+                   n_threads = umap_cores,
+                   n_sgd_threads = umap_cores)
 ```
 Compare the original RGB tiles with outcomes from pre-processing and dimension reduction. UMAP space is represented in similarity colors. 
 ```{r, echo=FALSE, out.width="100%"}

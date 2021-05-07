@@ -169,10 +169,11 @@ For details on this method, please refer to the [UWOT
 documentation](https://github.com/jlmelville/uwot).
 
 ``` r
-mclapply(FUN = umap_tile,
-                   X = list.files(preproc_dir, full.names = T),
-                   b = buff,
-                   mc.cores = umap_cores)
+lapply(FUN = umap_tile,
+                   X = list.files(preproc_dir, full.names = TRUE),
+                   out_dir = umap_dir,
+                   n_threads = umap_cores,
+                   n_sgd_threads = umap_cores)
 ```
 
 Compare the original RGB tiles with outcomes from pre-processing and
