@@ -23,7 +23,7 @@ tile_at_coords(coords, img, len_side, out_dir, buffer = 0, ncores = 1)
 None. Tiles are saved to out_dir.
 }
 \description{
-Accepts a matrix of coordinates and a path to a multi-band raster.
+Accepts a two-column matrix of coordinates and a path to a multi-band raster.
 Generates tiles of specified side length
 in CRS units of the data with an optional buffer to avoid edge effects in subsequent preocessing.
 Save tiles to an output directory for further preprocessing.

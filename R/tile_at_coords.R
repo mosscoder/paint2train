@@ -1,5 +1,5 @@
 #' @title Generate tiles from imagery and spatial data
-#' @description Accepts a matrix of coordinates and a path to a multi-band raster.
+#' @description Accepts a two-column matrix of coordinates and a path to a multi-band raster.
 #' Generates tiles of specified side length
 #' in CRS units of the data with an optional buffer to avoid edge effects in subsequent preocessing. 
 #' Save tiles to an output directory for further preprocessing.
