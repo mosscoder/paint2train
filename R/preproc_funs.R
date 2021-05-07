@@ -43,8 +43,9 @@
 #'  
 #' t_ndvi <- raster(t, band = 5)
 #' t_msavi <- raster(t, band = 6)
-#' plot(t_ndvi)
-#' plot(t_msavi)
+#' veg_inds <- stack(t_ndvi, t_msavi)
+#' names(veg_inds) <- c('NDVI','MSAVI')
+#' plot(veg_inds)
 #' @export
 ndvi_msavi <- function(tile, r_band = 1, nir_band = 4){
   t <- raster::stack(tile)
@@ -58,12 +59,12 @@ ndvi_msavi <- function(tile, r_band = 1, nir_band = 4){
 
 #' @title Apply Sobel filter
 #' @description sobel takes a multi-band raster stack, conducts principal components analysis, then 
-#' applies a Sobel filter to n PCA axes and appends these n bands to the tile. 
+#' applies a Sobel filter to *n* retained PCA axes and appends these *n* bands to the tile. 
 #' 
 #' @param tile File path to a mulit-band raster stack. 
 #' @param axes How many PCA axes to retain and filter.
 #' @param fill_na Whether to impute NA cells with mean of neighboring cells.
-#' @return None. Appends n bands to tile and overwrites appended stack to tile file path. 
+#' @return None. Appends *n* bands to tile and overwrites appended stack to tile file path. 
 #' 
 #' @examples 
 #' library(paint2train)
@@ -101,7 +102,8 @@ ndvi_msavi <- function(tile, r_band = 1, nir_band = 4){
 #' ndvi_msavi(tile = t, r_band = 1, nir_band = 4)
 #' sobel(t, axes = 3, fill_na = TRUE)
 #' t_sobels <- stack(t)[[7:9]]
-#' plot(t_sobels)
+#' names(t_sobels) <- c('PC1','PC2','PC3')
+#' plot(t_sobels, col = gray.colors(100))
 
 #' @export
 sobel <- function(tile, axes = 3, fill_na = TRUE){
@@ -145,7 +147,7 @@ sobel <- function(tile, axes = 3, fill_na = TRUE){
 #' @param f_width Focal neighborhood radius or radii (if a list) in which to perform calculations. 
 #' Units correspond to that of the tile CRS.
 #' @param fill_na Whether to impute NA cells with mean of neighboring cells.
-#' @return None. Appends i PCA axes by j f_widths for both mean and variance 
+#' @return None. Appends *i* PCA axes by *j* f_widths for both mean and variance 
 #' (axes X neighborhoods X 2) to tile and overwrites appended stack to tile file path. 
 #' Appended bands are sorted hierarchically by summary type (mean first), 
 #' then neighborhood, and finally PCA axis. 
@@ -191,9 +193,15 @@ sobel <- function(tile, axes = 3, fill_na = TRUE){
 #' mean_var(t, axes = 3, f_width = fs, fill_na = TRUE)
 #' t_full <- stack(t)
 #' t_mv <- t_full[[10:nlayers(t_full)]]
-#' 
+
+#' names(t_mv) <- paste(c(rep('mean',6), rep('var',6)),
+#'                      paste0('ngb_', c(rep(0.5, 3), rep(1, 3))),
+#'                      rep(paste0('axis_',1:3), 4),
+#'                      sep = '_')
+
 #' #mean_var output
 #' plot(t_mv)
+
 #' 
 #' @export  
 mean_var <- function(tile, axes = 3, f_width, fill_na = TRUE){
@@ -298,7 +306,7 @@ mean_var <- function(tile, axes = 3, f_width, fill_na = TRUE){
 #' fs <- c(0.5, 1)
 #' mean_var(t, axes = 3, f_width = fs, fill_na = TRUE)
 #' 
-#'remove_buffer(tile = t, b = buff)
+#' remove_buffer(tile = t, b = buff)
 #' 
 #' @export  
 remove_buffer <- function(tile, b){

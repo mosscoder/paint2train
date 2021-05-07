@@ -57,6 +57,7 @@ ndvi_msavi(tile = t, r_band = 1, nir_band = 4)
  
 t_ndvi <- raster(t, band = 5)
 t_msavi <- raster(t, band = 6)
-plot(t_ndvi)
-plot(t_msavi)
+veg_inds <- stack(t_ndvi, t_msavi)
+names(veg_inds) <- c('NDVI','MSAVI')
+plot(veg_inds)
 }

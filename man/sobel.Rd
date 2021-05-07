@@ -14,11 +14,11 @@ sobel(tile, axes = 3, fill_na = TRUE)
 \item{fill_na}{Whether to impute NA cells with mean of neighboring cells.}
 }
 \value{
-None. Appends n bands to tile and overwrites appended stack to tile file path.
+None. Appends \emph{n} bands to tile and overwrites appended stack to tile file path.
 }
 \description{
 sobel takes a multi-band raster stack, conducts principal components analysis, then
-applies a Sobel filter to n PCA axes and appends these n bands to the tile.
+applies a Sobel filter to \emph{n} retained PCA axes and appends these \emph{n} bands to the tile.
 }
 \examples{
 library(paint2train)
@@ -56,5 +56,6 @@ t <- list.files(preproc_dir, full.names = TRUE)[1]
 ndvi_msavi(tile = t, r_band = 1, nir_band = 4)
 sobel(t, axes = 3, fill_na = TRUE)
 t_sobels <- stack(t)[[7:9]]
-plot(t_sobels)
+names(t_sobels) <- c('PC1','PC2','PC3')
+plot(t_sobels, col = gray.colors(100))
 }

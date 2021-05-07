@@ -17,7 +17,7 @@ Units correspond to that of the tile CRS.}
 \item{fill_na}{Whether to impute NA cells with mean of neighboring cells.}
 }
 \value{
-None. Appends i PCA axes by j f_widths for both mean and variance
+None. Appends \emph{i} PCA axes by \emph{j} f_widths for both mean and variance
 (axes X neighborhoods X 2) to tile and overwrites appended stack to tile file path.
 Appended bands are sorted hierarchically by summary type (mean first),
 then neighborhood, and finally PCA axis.
@@ -68,7 +68,10 @@ fs <- c(0.5, 1)
 mean_var(t, axes = 3, f_width = fs, fill_na = TRUE)
 t_full <- stack(t)
 t_mv <- t_full[[10:nlayers(t_full)]]
-
+names(t_mv) <- paste(c(rep('mean',6), rep('var',6)),
+                     paste0('ngb_', c(rep(0.5, 3), rep(1, 3))),
+                     rep(paste0('axis_',1:3), 4),
+                     sep = '_')
 #mean_var output
 plot(t_mv)
 
