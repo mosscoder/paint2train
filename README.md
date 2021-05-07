@@ -1,7 +1,7 @@
 paint2train package
 ================
 
-<img src="https://github.com/mosscoder/paint2train/blob/main/images/banner.png?raw=true" width="100%" />
+<img src="https://github.com/mosscoder/paint2train/blob/main/images/combo_banner.gif?raw=true" width="100%" />
 
 ## Background
 

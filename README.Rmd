@@ -3,7 +3,7 @@ title: "paint2train package"
 output: github_document
 ---
 ```{r, echo=FALSE, out.width="100%"}
-knitr::include_graphics("https://github.com/mosscoder/paint2train/blob/main/images/banner.png?raw=true")
+knitr::include_graphics("https://github.com/mosscoder/paint2train/blob/main/images/combo_banner.gif?raw=true")
 ```
 
 ## Background
