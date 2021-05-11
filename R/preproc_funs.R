@@ -10,7 +10,8 @@
 #' library(paint2train)
 #' 
 #' image_dir <- tempfile()
-#' download.file(url = 'https://github.com/mosscoder/paint2train/blob/main/data/sample_4band.tif?raw=true', destfile = image_dir)
+#' image_url <- 'https://github.com/mosscoder/paint2train/blob/main/data/sample_4band.tif?raw=true'
+#' download.file(url = image_url, destfile = image_dir)
 #' tdir <- tempdir()
 #' setwd(tdir) 
 #' preproc_dir <- 'preproc_tiles'
@@ -70,7 +71,8 @@ ndvi_msavi <- function(tile, r_band = 1, nir_band = 4){
 #' library(paint2train)
 #' 
 #' image_dir <- tempfile()
-#' download.file(url = 'https://github.com/mosscoder/paint2train/blob/main/data/sample_4band.tif?raw=true', destfile = image_dir)
+#' image_url <- 'https://github.com/mosscoder/paint2train/blob/main/data/sample_4band.tif?raw=true'
+#' download.file(url = image_url, destfile = image_dir)
 #' tdir <- tempdir()
 #' setwd(tdir) 
 #' preproc_dir <- 'preproc_tiles'
@@ -156,7 +158,8 @@ sobel <- function(tile, axes = 3, fill_na = TRUE){
 #' library(paint2train)
 #' 
 #' image_dir <- tempfile()
-#' download.file(url = 'https://github.com/mosscoder/paint2train/blob/main/data/sample_4band.tif?raw=true', destfile = image_dir)
+#' image_url <- 'https://github.com/mosscoder/paint2train/blob/main/data/sample_4band.tif?raw=true'
+#' download.file(url = image_url, destfile = image_dir)
 #' tdir <- tempdir()
 #' setwd(tdir) 
 #' preproc_dir <- 'preproc_tiles'
@@ -272,7 +275,8 @@ mean_var <- function(tile, axes = 3, f_width, fill_na = TRUE){
 #' library(paint2train)
 #' 
 #' image_dir <- tempfile()
-#' download.file(url = 'https://github.com/mosscoder/paint2train/blob/main/data/sample_4band.tif?raw=true', destfile = image_dir)
+#' image_url <- 'https://github.com/mosscoder/paint2train/blob/main/data/sample_4band.tif?raw=true'
+#' download.file(url = image_url, destfile = image_dir)
 #' tdir <- tempdir()
 #' setwd(tdir) 
 #' preproc_dir <- 'preproc_tiles'

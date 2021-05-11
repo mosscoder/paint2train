@@ -21,6 +21,7 @@ Depends:
     htmltools,
     leafem,
     leaflet,
+    leaflet.extras,	
     raster,
     scales,
     shiny,

@@ -23,7 +23,8 @@ as implemented in UWOT package. Tuning parameters may be passed to umap() via ..
 library(paint2train)
 
 image_dir <- tempfile()
-download.file(url = 'https://github.com/mosscoder/paint2train/blob/main/data/sample_4band.tif?raw=true', destfile = image_dir)
+image_url <- 'https://github.com/mosscoder/paint2train/blob/main/data/sample_4band.tif?raw=true'
+download.file(url = image_url, destfile = image_dir)
 tdir <- tempdir()
 setwd(tdir) 
 preproc_dir <- 'preproc_tiles'
@@ -54,6 +55,7 @@ tile_at_coords(coords = coord_mat,
  out_dir = preproc_dir,
  img = image_dir,
  ncores = cores)
+
 preproc_pipeline <- function(t, fs, b){
  ndvi_msavi(tile = t, r_band = 1, nir_band = 4)
  sobel(t, axes = 3, fill_na = TRUE)

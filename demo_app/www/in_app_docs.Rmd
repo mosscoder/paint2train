@@ -3,7 +3,7 @@ title: "paint2train package"
 output: github_document
 ---
 ```{r, echo=FALSE, out.width="100%"}
-knitr::include_graphics("https://github.com/mosscoder/paint2train/blob/main/images/banner.png?raw=true")
+knitr::include_graphics("https://github.com/mosscoder/paint2train/blob/main/images/combo_banner.gif?raw=true")
 ```
 
 ## Background
@@ -37,6 +37,11 @@ knitr::include_graphics("https://github.com/mosscoder/paint2train/blob/main/imag
 Adjust the color of painted areas from the **Aesthetics Controls** drop down menu.
 ```{r, echo=FALSE, out.width="100%"}
 knitr::include_graphics("https://github.com/mosscoder/paint2train/blob/main/images/change_paint.gif?raw=true")
+```
+
+Manually edit pixels by using the draw tools (lower right). Draw a box or polygon around the region you wish to edit, select the appropriate class from the **Select class to label** menu, then click **Label drawn areas**
+```{r, echo=FALSE, out.width="100%"}
+knitr::include_graphics("https://github.com/mosscoder/paint2train/blob/main/images/draw.gif?raw=true")
 ```
 
 Change the base imagery with the controls in the upper right. 

@@ -1,7 +1,7 @@
 paint2train package
 ================
 
-<img src="https://github.com/mosscoder/paint2train/blob/main/images/banner.png?raw=true" width="100%" />
+<img src="https://github.com/mosscoder/paint2train/blob/main/images/combo_banner.gif?raw=true" width="100%" />
 
 ## Background
 
@@ -41,6 +41,12 @@ unlabeled points by click the **FIll unlabeled as class** button.
 Adjust the color of painted areas from the **Aesthetics Controls** drop
 down menu.
 <img src="https://github.com/mosscoder/paint2train/blob/main/images/change_paint.gif?raw=true" width="100%" />
+
+Manually edit pixels by using the draw tools (lower right). Draw a box
+or polygon around the region you wish to edit, select the appropriate
+class from the **Select class to label** menu, then click **Label drawn
+areas**
+<img src="https://github.com/mosscoder/paint2train/blob/main/images/draw.gif?raw=true" width="100%" />
 
 Change the base imagery with the controls in the upper right.
 <img src="https://github.com/mosscoder/paint2train/blob/main/images/base_select.gif?raw=true" width="100%" />

@@ -24,7 +24,8 @@ applies a Sobel filter to \emph{n} retained PCA axes and appends these \emph{n} 
 library(paint2train)
 
 image_dir <- tempfile()
-download.file(url = 'https://github.com/mosscoder/paint2train/blob/main/data/sample_4band.tif?raw=true', destfile = image_dir)
+image_url <- 'https://github.com/mosscoder/paint2train/blob/main/data/sample_4band.tif?raw=true'
+download.file(url = image_url, destfile = image_dir)
 tdir <- tempdir()
 setwd(tdir) 
 preproc_dir <- 'preproc_tiles'

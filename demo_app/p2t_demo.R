@@ -1,6 +1,7 @@
 library(raster)
 library(leaflet)
 library(leafem)
+library(leaflet.extras)
 library(htmlwidgets)
 library(shinyWidgets)
 library(tidyverse)
@@ -35,7 +36,7 @@ abs_style <- "background:white; padding: 20px 20px 20px 20px; border-radius: 5pt
 ui <- shiny::fillPage(
   shiny::tags$style('.leaflet-container { cursor: auto !important; }' ),
   
-  leaflet::leafletOutput('m1_leaf', height = '100vh'),
+  leaflet::leafletOutput('leafmap', height = '100vh'),
   
   shiny::absolutePanel(
     top = 10,
@@ -155,7 +156,14 @@ ui <- shiny::fillPage(
                        draggable = TRUE,
                        width = 250,
                        style = abs_style,
-                       shiny::h2("Labeling Tools"),
+                       shiny::h4("Labeling Tools"),
+                       
+                       shiny::selectInput(
+                         inputId = 'label_class',
+                         label = 'Select class to label:',
+                         choices = names(label_key),
+                         selected = names(label_key)[0]
+                       ),
                        shiny::sliderInput(
                          inputId = 'thresh',
                          label = 'Dissimilarity threshold',
@@ -165,16 +173,16 @@ ui <- shiny::fillPage(
                          max = 1,
                          step = 0.005
                        ),
-                       shiny::selectInput(
-                         inputId = 'label_class',
-                         label = 'Select class to label:',
-                         choices = names(label_key),
-                         selected = names(label_key)[0]
-                       ),
                        
                        shiny::actionButton(inputId = 'assign',
                                            label = 'Label painted areas',
                                            class = 'btn-primary'),
+                       
+                       shiny::hr(),
+                       shiny::actionButton(inputId = 'assign_draw',
+                                           label = 'Label drawn areas',
+                                           class = 'btn-warning'),
+                       
                        shiny::hr(),
                        shiny::actionButton(inputId = 'filter_noise',
                                            label = 'Filter lone pixels',
@@ -235,7 +243,7 @@ server <- function(input, output, session) {
   leaf_opts <- leaflet::leafletOptions(zoomControl = FALSE)
   
   
-  output$m1_leaf <-
+  output$leafmap <-
     leaflet::renderLeaflet(
       leaflet::leaflet(options = leaf_opts) %>%
         leaflet::fitBounds(
@@ -257,13 +265,19 @@ server <- function(input, output, session) {
           options = leaflet::layersControlOptions(collapsed = FALSE,
                                                   autoZIndex = TRUE),
           position = 'bottomright'
-        )
+        ) %>%
+        leaflet.extras::addDrawToolbar(position = 'bottomright', 
+                                       singleFeature = TRUE,
+                                       polylineOptions = FALSE,
+                                       markerOptions = FALSE,
+                                       circleMarkerOptions = FALSE,
+                                       circleOptions = FALSE,
+                                       editOptions = leaflet.extras::editToolbarOptions(edit = FALSE, remove = TRUE)) 
     ) 
   
   
   shiny::observe({
-    
-    leaflet::leafletProxy('m1_leaf') %>%
+    leaflet::leafletProxy('leafmap') %>%
       leaflet::clearControls() %>%
       leaflet::clearGroup('Trule color') %>%
       leaflet::clearGroup('UMAP') %>%
@@ -304,12 +318,13 @@ server <- function(input, output, session) {
                                 overlayGroups = c('Currently painted', 'Classes Labeled'),
                                 options = leaflet::layersControlOptions(collapsed = FALSE)) %>%
       leaflet::hideGroup('UMAP') %>%
-      leaflet::hideGroup('NIR false color')
+      leaflet::hideGroup('NIR false color') 
+    
   })
   
   shiny::observeEvent(c(input$u_1, input$u_2, input$u_3), {
     
-    leaflet::leafletProxy('m1_leaf') %>%
+    leaflet::leafletProxy('leafmap') %>%
       leaflet::clearGroup('UMAP') %>%
       leafem::addRasterRGB(base_ras()[[1:3]], 
                            r = as.numeric(input$u_1), 
@@ -323,8 +338,8 @@ server <- function(input, output, session) {
     
   })
   
-  click_coords <- eventReactive(input$m1_leaf_click, {
-    click <- input$m1_leaf_click
+  click_coords <- shiny::eventReactive(input$leafmap_click, {
+    click <- input$leafmap_click
     if (is.null(click))
       return()
     
@@ -337,7 +352,17 @@ server <- function(input, output, session) {
     
   })
   
-  umap_vals <- eventReactive(input$m1_leaf_click, {
+  edit_status <- shiny::reactiveValues(status = FALSE)
+  
+  shiny::observeEvent(input$leafmap_draw_start, {
+    edit_status$status <- TRUE
+  })
+  
+  shiny::observeEvent(input$leafmap_draw_stop, {
+    edit_status$status <- FALSE
+  })
+  
+  umap_vals <- shiny::eventReactive(input$leafmap_click, {
     if (is.null(click_coords()))
       return()
     vals <- raster::extract(umap_ras(), click_coords())
@@ -345,13 +370,13 @@ server <- function(input, output, session) {
     vals
   })
   
-  observeEvent(input$img_sel, {
+  shiny::observeEvent(input$img_sel, {
     pf <- umap_ras()
-    values(pf) <- NA
+    raster::values(pf) <- NA
     raster::writeRaster(pf, paint_file, overwrite = TRUE)
   })
   
-  observe({
+  shiny::observe({
     lab_file <- file.path(label_dir, basename(fname()))
     if(!file.exists(lab_file)){
       label_ras <- umap_ras()[[1]]
@@ -360,9 +385,11 @@ server <- function(input, output, session) {
     }
   })
   
-  observeEvent(c(input$m1_leaf_click, input$thresh) , {
-    if (is.na(umap_vals()[1]))
+  shiny::observeEvent(c(input$leafmap_click, input$thresh) , {
+    print(edit_status$status)
+    if (is.na(umap_vals()[1]) | isTRUE(edit_status$status))
       return()
+    
     udf <- data.frame(u1 = raster::values(umap_ras()[[1]]),
                       u2 = raster::values(umap_ras()[[2]]),
                       u3 = raster::values(umap_ras()[[3]]))
@@ -377,7 +404,7 @@ server <- function(input, output, session) {
     
   })
   
-  observeEvent(input$filter_noise, {
+  shiny::observeEvent(input$filter_noise, {
     painted_ras <-
       raster::raster(paint_file)
     
@@ -392,20 +419,32 @@ server <- function(input, output, session) {
     raster::writeRaster(painted_ras, paint_file, overwrite = TRUE)
   })
   
-  observeEvent(input$assign,{
+  shiny::observeEvent(input$assign,{
     lab_file <- file.path(label_dir, basename(fname()))
     label_ras <- raster::raster(lab_file)
     painted_ras <- raster::raster(paint_file)
-    
     pix_to_class <- which(raster::values(painted_ras) == 1)
     class_val <- label_key[which(names(label_key) == input$label_class)] %>% unlist()
-    
     raster::values(label_ras)[pix_to_class] <- class_val
-    
     raster::writeRaster(label_ras, lab_file, overwrite = TRUE)
   })
   
-  observeEvent(input$fill_remainder,{
+  shiny::observeEvent(input$assign_draw,{
+    lab_file <- file.path(label_dir, basename(fname()))
+    label_ras <- raster::raster(lab_file)
+    polygon_coordinates <- input$leafmap_draw_new_feature$geometry$coordinates[[1]]
+    drawn_polygon <- do.call(rbind,lapply(polygon_coordinates,function(x){c(x[[1]][1],x[[2]][1])}))
+    drawn_polygon <- sp::Polygons(list(sp::Polygon(drawn_polygon)), ID = 1)
+    drawn_polygon <- sp::SpatialPolygons(list(drawn_polygon))
+    sp::proj4string(drawn_polygon) <- '+init=epsg:4326'
+    drawn_polygon <- sp::spTransform(drawn_polygon, targ_crs)
+    pix_to_class <- raster::cellFromPolygon(label_ras, drawn_polygon) %>% unlist()
+    class_val <- label_key[which(names(label_key) == input$label_class)] %>% unlist()
+    raster::values(label_ras)[pix_to_class] <- class_val
+    raster::writeRaster(label_ras, lab_file, overwrite = TRUE)
+  })
+  
+  shiny::observeEvent(input$fill_remainder,{
     lab_file <- file.path(label_dir, basename(fname()))
     label_ras <- raster::raster(lab_file)
     
@@ -417,27 +456,66 @@ server <- function(input, output, session) {
     raster::writeRaster(label_ras, lab_file, overwrite = TRUE)
   })
   
+  paint_r <- shiny::reactive({raster::raster(paint_file)})
+  lab_r <- shiny::reactive({raster::raster(file.path(label_dir, basename(fname())))})
+  
   shiny::observeEvent(
     c(
-      input$m1_leaf_click,
+      input$leafmap_click,
       input$paint_col,
       input$paint_op,
+      input$thresh
+    ),{
+      
+      if(isTRUE(edit_status$status))
+        return()
+      
+      painted_ras <- shiny::req(paint_r())
+      
+      leaflet::leafletProxy(map = 'leafmap') %>%
+        leaflet::clearControls() %>%
+        leaflet::clearGroup(group = 'Currently painted') %>%
+        leaflet::clearGroup(group = 'legend') %>%
+        leaflet::addRasterImage(
+          painted_ras,
+          color = input$paint_col,
+          project = TRUE,
+          opacity = input$paint_op,
+          group = 'Currently painted',
+          method = 'ngb'
+        ) %>%
+        leaflet::addLegend(position = 'topright',
+                           colors = label_cols,
+                           labels = names(label_key),
+                           title = 'Classes', 
+                           group = 'legend') %>%
+        leaflet::addLayersControl(baseGroups = c('True color', 'UMAP', 'NIR false color'),
+                                  overlayGroups = c('Currently painted', 'Classes Labeled'),
+                                  options = leaflet::layersControlOptions(collapsed = FALSE)) 
+      
+      
+      
+    }
+  )
+  
+  shiny::observeEvent(
+    c(
       input$lab_op,
       input$filter_noise,
       input$fill_remainder,
-      input$thresh,
       input$assign,
-      input$m1
+      input$assign_draw
     ),{
       
-      labs <- raster::raster(file.path(label_dir, basename(fname())))
-      painted_ras <- raster::raster(paint_file)
+      if(isTRUE(edit_status$status))
+        return()
+      
+      labs <- shiny::req(lab_r())
       
       class_pal <- leaflet::colorNumeric(palette = label_cols, domain = label_key, na.color = 'transparent')
       
-      leaflet::leafletProxy(map = 'm1_leaf') %>%
+      leaflet::leafletProxy(map = 'leafmap') %>%
         leaflet::clearControls() %>%
-        leaflet::clearGroup(group = 'Currently painted') %>%
         leaflet::clearGroup(group = 'Classes Labeled') %>%
         leaflet::clearGroup(group = 'legend') %>%
         leaflet::addRasterImage(
@@ -446,14 +524,6 @@ server <- function(input, output, session) {
           opacity = input$lab_op,
           project = TRUE,
           group = 'Classes Labeled',
-          method = 'ngb'
-        ) %>%
-        leaflet::addRasterImage(
-          painted_ras,
-          color = input$paint_col,
-          project = TRUE,
-          opacity = input$paint_op,
-          group = 'Currently painted',
           method = 'ngb'
         ) %>%
         leaflet::addLegend(position = 'topright',
