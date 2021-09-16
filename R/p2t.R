@@ -110,10 +110,17 @@ p2t <- function(umap_dir, label_dir, label_key, label_cols,
   band_count <- raster::nlayers(raster::stack(umap_files[1]))
   band_choices <- seq_len(band_count)
   
-  pf <- raster::raster(umap_files[1])[[1]]
-  raster::values(pf) <- NA
-  paint_file <- file.path(label_dir, 'paint_in_prog.tif')
-  raster::writeRaster(pf, paint_file, overwrite = TRUE)
+  paint_files <- file.path(tempdir(), 
+                           str_replace(basename(umap_files), 
+                                       pattern = '.tif', '_paint.tif')
+                           )
+  
+  for(i in seq_along(paint_files)){
+     pf <- raster::raster(umap_files[i])[[1]]
+     raster::values(pf) <- NA
+     raster::writeRaster(pf, paint_files[i], overwrite = TRUE)
+  }
+  
   
   split_format <- shiny::tags$head(shiny::tags$style(htmltools::HTML(".shiny-split-layout > div { overflow: visible; }")))
   abs_style <- "background:white; padding: 20px 20px 20px 20px; border-radius: 5pt;"
@@ -136,156 +143,161 @@ p2t <- function(umap_dir, label_dir, label_key, label_cols,
       ),
       htmltools::HTML('<button data-toggle="collapse" data-target="#demo">Aesthetics controls</button>'),
       shiny::tags$div(id = 'demo',  class="collapse",
-      shiny::splitLayout(
-        split_format,
-        cellWidths = c('0%', '25%', '25%', '25%', '25%'),
-        shiny::selectInput(
-          inputId = 'b_1',
-          label = 'R band',
-          choices = band_choices,
-          selected = 4,
-          width = 100
-        ),
-        shiny::selectInput(
-          inputId = 'b_2',
-          label = 'G band',
-          choices = band_choices,
-          selected = 5,
-          width = 100
-        ),
-        shiny::selectInput(
-          inputId = 'b_3',
-          label = 'B band',
-          choices = band_choices,
-          selected = 6,
-          width = 100
-        ),
-        shiny::selectInput(
-          inputId = 'b_4',
-          label = 'NIR band',
-          choices = band_choices,
-          selected = 7,
-          width = 100
-        )
-      ),
-      
-      shiny::splitLayout(
-        split_format,
-        cellWidths = c('0%', '33%', '33%', '33%'),
-        shiny::selectInput(
-          inputId = 'u_1',
-          label = 'UMAP R',
-          choices = 1:3,
-          selected = 1,
-          width = 100
-        ),
-        shiny::selectInput(
-          inputId = 'u_2',
-          label = 'UMAP G',
-          choices = 1:3,
-          selected = 2,
-          width = 100
-        ),
-        shiny::selectInput(
-          inputId = 'u_3',
-          label = 'UMAP B',
-          choices = 1:3,
-          selected = 3,
-          width = 100
-        )
-      ),
-      
-      shiny::sliderInput(
-        inputId = 'img_qt_1',
-        label = 'Baselayer quantiles',
-        ticks = FALSE,
-        value = c(0.02, 0.98),
-        min = 0,
-        max = 1
-      ),
-      
-      shiny::hr(),
-      
-      shiny::sliderInput(
-        inputId = 'paint_op',
-        label = 'Paint opacity',
-        ticks = FALSE,
-        value = 1,
-        min = 0,
-        max = 1,
-        step = 0.01
-      ),
-      
-      shiny::hr(),
-      
-      shiny::sliderInput(
-        inputId = 'lab_op',
-        label = 'Label opacity',
-        ticks = FALSE,
-        value = 1,
-        min = 0,
-        max = 1,
-        step = 0.01
-      ),
-      
-      shiny::radioButtons(
-        inputId = 'paint_col',
-        label = 'Paint color',
-        choices = c('Red', 'Green', 'Blue', 'Cyan'),
-        inline = TRUE
-      ))
-      ),
-        
-        shiny::absolutePanel(top = 260,
-                             right = 15,
-                             draggable = TRUE,
-                             width = 250,
-                             style = abs_style,
-                             shiny::h4("Labeling Tools"),
-                             
-                             shiny::selectInput(
-                               inputId = 'label_class',
-                               label = 'Select class to label:',
-                               choices = names(label_key),
-                               selected = names(label_key)[0]
-                             ),
-                             shiny::sliderInput(
-                               inputId = 'thresh',
-                               label = 'Dissimilarity threshold',
-                               ticks = FALSE,
-                               value = 0.1,
-                               min = 0,
-                               max = 1,
-                               step = 0.005
-                             ),
-                             
-                             shiny::actionButton(inputId = 'assign',
-                                                 label = 'Label painted areas',
-                                                 class = 'btn-primary'),
-                             
-                             shiny::hr(),
-                             shiny::actionButton(inputId = 'assign_draw',
-                                                 label = 'Label drawn areas',
-                                                 class = 'btn-warning'),
-                             
-                             shiny::hr(),
-                             shiny::actionButton(inputId = 'filter_noise',
-                                                 label = 'Filter lone pixels',
-                                                 class = 'btn-success'),
-                             shiny::hr(),
-                             shiny::actionButton(inputId = 'fill_remainder',
-                                                 label = 'Fill unlabeled as class',
-                                                 class = 'btn-danger')
-        )
-      )
-      
+                      shiny::splitLayout(
+                        split_format,
+                        cellWidths = c('0%', '25%', '25%', '25%', '25%'),
+                        shiny::selectInput(
+                          inputId = 'b_1',
+                          label = 'R band',
+                          choices = band_choices,
+                          selected = 4,
+                          width = 100
+                        ),
+                        shiny::selectInput(
+                          inputId = 'b_2',
+                          label = 'G band',
+                          choices = band_choices,
+                          selected = 5,
+                          width = 100
+                        ),
+                        shiny::selectInput(
+                          inputId = 'b_3',
+                          label = 'B band',
+                          choices = band_choices,
+                          selected = 6,
+                          width = 100
+                        ),
+                        shiny::selectInput(
+                          inputId = 'b_4',
+                          label = 'NIR band',
+                          choices = band_choices,
+                          selected = 7,
+                          width = 100
+                        )
+                      ),
+                      
+                      shiny::splitLayout(
+                        split_format,
+                        cellWidths = c('0%', '33%', '33%', '33%'),
+                        shiny::selectInput(
+                          inputId = 'u_1',
+                          label = 'UMAP R',
+                          choices = 1:3,
+                          selected = 1,
+                          width = 100
+                        ),
+                        shiny::selectInput(
+                          inputId = 'u_2',
+                          label = 'UMAP G',
+                          choices = 1:3,
+                          selected = 2,
+                          width = 100
+                        ),
+                        shiny::selectInput(
+                          inputId = 'u_3',
+                          label = 'UMAP B',
+                          choices = 1:3,
+                          selected = 3,
+                          width = 100
+                        )
+                      ),
+                      
+                      shiny::sliderInput(
+                        inputId = 'img_qt_1',
+                        label = 'Baselayer quantiles',
+                        ticks = FALSE,
+                        value = c(0.02, 0.98),
+                        min = 0,
+                        max = 1
+                      ),
+                      
+                      shiny::hr(),
+                      
+                      shiny::sliderInput(
+                        inputId = 'paint_op',
+                        label = 'Paint opacity',
+                        ticks = FALSE,
+                        value = 1,
+                        min = 0,
+                        max = 1,
+                        step = 0.01
+                      ),
+                      
+                      shiny::hr(),
+                      
+                      shiny::sliderInput(
+                        inputId = 'lab_op',
+                        label = 'Label opacity',
+                        ticks = FALSE,
+                        value = 1,
+                        min = 0,
+                        max = 1,
+                        step = 0.01
+                      ),
+                      
+                      shiny::radioButtons(
+                        inputId = 'paint_col',
+                        label = 'Paint color',
+                        choices = c('Red', 'Green', 'Blue', 'Cyan'),
+                        inline = TRUE
+                      ))
+    ),
     
+    shiny::absolutePanel(top = 260,
+                         right = 15,
+                         draggable = TRUE,
+                         width = 250,
+                         style = abs_style,
+                         shiny::h4("Labeling Tools"),
+                         
+                         shiny::selectInput(
+                           inputId = 'label_class',
+                           label = 'Select class to label:',
+                           choices = names(label_key),
+                           selected = names(label_key)[0]
+                         ),
+                         shiny::sliderInput(
+                           inputId = 'thresh',
+                           label = 'Dissimilarity threshold',
+                           ticks = FALSE,
+                           value = 0.1,
+                           min = 0,
+                           max = 1,
+                           step = 0.005
+                         ),
+                         
+                         shiny::actionButton(inputId = 'assign',
+                                             label = 'Label painted areas',
+                                             class = 'btn-primary'),
+                         
+                         shiny::hr(),
+                         shiny::actionButton(inputId = 'assign_draw',
+                                             label = 'Label drawn areas',
+                                             class = 'btn-warning'),
+                         
+                         shiny::hr(),
+                         shiny::actionButton(inputId = 'filter_noise',
+                                             label = 'Filter lone pixels',
+                                             class = 'btn-success'),
+                         shiny::hr(),
+                         shiny::actionButton(inputId = 'fill_remainder',
+                                             label = 'Fill unlabeled as class',
+                                             class = 'btn-danger')
+    )
+  )
+  
+  
   
   server <- function(input, output, session) {
     
     fname <- shiny::reactive({
       file_ind <- which(basename(umap_files) == input$img_sel)
       umap_files[file_ind]
+    })
+    
+    paint_file <- shiny::reactive({
+      file_ind <- which(basename(umap_files) == input$img_sel)
+      paint_files[file_ind]
     })
     
     band_inds <- shiny::reactive({as.numeric(c(1:3,input$b_1, input$b_2, input$b_3, input$b_4))})
@@ -398,7 +410,7 @@ p2t <- function(umap_dir, label_dir, label_key, label_cols,
     })
     
     shiny::observeEvent(c(input$u_1, input$u_2, input$u_3), {
-     
+      
       leaflet::leafletProxy('leafmap') %>%
         leaflet::clearGroup('UMAP') %>%
         leafem::addRasterRGB(base_ras()[[1:3]], 
@@ -410,7 +422,7 @@ p2t <- function(umap_dir, label_dir, label_key, label_cols,
                              maxBytes = 12 * 1024 * 1024, 
                              project = FALSE
         ) 
-        
+      
     })
     
     click_coords <- shiny::eventReactive(input$leafmap_click, {
@@ -445,12 +457,6 @@ p2t <- function(umap_dir, label_dir, label_key, label_cols,
       vals
     })
     
-    shiny::observeEvent(input$img_sel, {
-      pf <- umap_ras()
-      raster::values(pf) <- NA
-      raster::writeRaster(pf, paint_file, overwrite = TRUE)
-      })
-    
     shiny::observe({
       lab_file <- file.path(label_dir, basename(fname()))
       if(!file.exists(lab_file)){
@@ -471,17 +477,17 @@ p2t <- function(umap_dir, label_dir, label_key, label_cols,
       
       dists <- RANN::nn2(data = umap_vals(),
                          query = umap_pts())$nn.dists %>% unlist()
-      painted_ras <- raster::raster(paint_file)
+      painted_ras <- raster::raster(paint_file())
       raster::values(painted_ras) <-
         ifelse(scales::rescale(dists) < input$thresh, 1, NA)
       
-      raster::writeRaster(painted_ras, paint_file, overwrite = TRUE)
+      raster::writeRaster(painted_ras, paint_file(), overwrite = TRUE)
       
     })
     
     shiny::observeEvent(input$filter_noise, {
       painted_ras <-
-        raster::raster(paint_file)
+        raster::raster(paint_file())
       
       f <-
         raster::focal(painted_ras,
@@ -491,13 +497,13 @@ p2t <- function(umap_dir, label_dir, label_key, label_cols,
       loners <- which(raster::values(f) == 1)
       raster::values(painted_ras)[loners] <- NA
       
-      raster::writeRaster(painted_ras, paint_file, overwrite = TRUE)
+      raster::writeRaster(painted_ras, paint_file(), overwrite = TRUE)
     })
     
     shiny::observeEvent(input$assign,{
       lab_file <- file.path(label_dir, basename(fname()))
       label_ras <- raster::raster(lab_file)
-      painted_ras <- raster::raster(paint_file)
+      painted_ras <- raster::raster(paint_file())
       pix_to_class <- which(raster::values(painted_ras) == 1)
       class_val <- label_key[which(names(label_key) == input$label_class)] %>% unlist()
       raster::values(label_ras)[pix_to_class] <- class_val
@@ -531,7 +537,7 @@ p2t <- function(umap_dir, label_dir, label_key, label_cols,
       raster::writeRaster(label_ras, lab_file, overwrite = TRUE)
     })
     
-    paint_r <- shiny::reactive({raster::raster(paint_file)})
+    paint_r <- shiny::reactive({raster::raster(paint_file())})
     lab_r <- shiny::reactive({raster::raster(file.path(label_dir, basename(fname())))})
     
     shiny::observeEvent(
@@ -574,7 +580,7 @@ p2t <- function(umap_dir, label_dir, label_key, label_cols,
     )
     
     shiny::observeEvent(
-      c(
+      c(input$img_sel,
         input$lab_op,
         input$filter_noise,
         input$fill_remainder,
@@ -616,8 +622,7 @@ p2t <- function(umap_dir, label_dir, label_key, label_cols,
     )
     
     session$onSessionEnded(function() {
-      if(file.exists(paint_file))
-        file.remove(paint_file)
+        file.remove(paint_files)
     })
     
   }
