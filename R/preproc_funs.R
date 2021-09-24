@@ -321,7 +321,6 @@ remove_buffer <- function(tile, b){
                       buff_e[3] - b,
                       buff_e[4] + b)
   crp <- raster::crop(t, no_buff_e)
-  crp <- raster::setExtent(crp, no_buff_e)
   raster::writeRaster(crp, tile, overwrite = TRUE)
 }
 
