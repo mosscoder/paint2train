@@ -116,10 +116,15 @@ sobel <- function(tile, axes = 3, fill_na = TRUE){
       t[[i]] <- raster::focal(t[[i]], matrix(1,3,3), fun="mean", na.rm=TRUE, NAonly=TRUE, pad=TRUE) 
     }
   }
+  if(axes > 0) {
+    vals <- raster::getValues(t)
+    pca <-
+      stats::prcomp(vals, center = TRUE, scale. = TRUE)$x[, seq_len(axes), drop = FALSE]
+  }
   
-  vals <- raster::getValues(t)
-  pca <- stats::prcomp(vals, center = TRUE, scale. = TRUE)$x[,seq_len(axes), drop = FALSE]
-  sobel_stack <- pca_stack <- t[[seq_len(axes)]]
+  lyrs <- ifelse(axes > 0, axes, raster::nlayers(t))
+  
+  sobel_stack <- output_stack <- t[[seq_len(lyrs)]]
   
   sob_vec <- c(1,2,1,0,0,0,-1,-2,-1)
   
@@ -128,10 +133,12 @@ sobel <- function(tile, axes = 3, fill_na = TRUE){
                      nrow = 3)
   sb_y_mat <- t(sb_x_mat)
   
-  for(i in seq_len(axes)){
-    raster::values(pca_stack[[i]]) <- pca[, i, drop = FALSE]
-    sx <- raster::focal(pca_stack[[i]], w = sb_x_mat, na.rm = TRUE)
-    sy <- raster::focal(pca_stack[[i]], w = sb_y_mat, na.rm = TRUE)
+  
+  for(i in seq_len(lyrs)){
+    if(axes > 0) {dat <- pca[, i, drop = FALSE]} else {dat <- values(t[[i]])}
+    raster::values(output_stack[[i]]) <- dat
+    sx <- raster::focal(output_stack[[i]], w = sb_x_mat, na.rm = TRUE)
+    sy <- raster::focal(output_stack[[i]], w = sb_y_mat, na.rm = TRUE)
     sobel_stack[[i]] <- sqrt(sx^2 + sy^2)
   }
   
@@ -207,40 +214,55 @@ sobel <- function(tile, axes = 3, fill_na = TRUE){
 
 #' 
 #' @export  
-mean_var <- function(tile, axes = 3, f_width, fill_na = TRUE){
+mean_var <- function(tile,
+                     axes = 3,
+                     f_width,
+                     fill_na = TRUE) {
   t <- raster::stack(tile)
   
-  if(isTRUE(fill_na)){
-    for(i in seq_len(raster::nlayers(t))){
-      t[[i]] <- raster::focal(t[[i]], matrix(1,3,3), fun="mean", na.rm=TRUE, NAonly=TRUE, pad=TRUE) 
+  if (isTRUE(fill_na)) {
+    for (i in seq_len(raster::nlayers(t))) {
+      t[[i]] <-
+        raster::focal(
+          t[[i]],
+          matrix(1, 3, 3),
+          fun = "mean",
+          na.rm = TRUE,
+          NAonly = TRUE,
+          pad = TRUE
+        )
     }
   }
   
-  vals <- raster::getValues(t)
+  lyrs <- ifelse(axes > 0, axes, raster::nlayers(t))
+  output_stack <- t[[seq_len(lyrs)]]
   
-  pca <- stats::prcomp(vals, center = TRUE, scale. = TRUE)$x[,seq_len(axes), drop = FALSE]
-  pca_stack <- t[[seq_len(axes)]]
-  for (i in seq_len(axes)) {
-    raster::values(pca_stack[[i]]) <- pca[, i, drop = FALSE]
+  if (axes > 0) {
+    vals <- raster::getValues(t)
+    pca <-
+      stats::prcomp(vals, center = TRUE, scale. = TRUE)$x[, seq_len(lyrs), drop = FALSE]
+    for (i in seq_len(lyrs)) {
+      raster::values(output_stack[[i]]) <- pca[, i, drop = FALSE]
+    }
   }
   
-  f_grid <- expand.grid(c('mean','var'),
-                        f_width, 
-                        seq_len(axes)) %>%
+  f_grid <- expand.grid(c('mean', 'var'),
+                        f_width,
+                        seq_len(lyrs)) %>%
     as.data.frame()
-  colnames(f_grid) <- c('fun','width','pca_axis')
-  f_grid <- f_grid[order(f_grid[,1], 
-                         f_grid[,2],
-                         f_grid[,3]),]
+  colnames(f_grid) <- c('fun', 'width', 'env_axis')
+  f_grid <- f_grid[order(f_grid[, 1],
+                         f_grid[, 2],
+                         f_grid[, 3]), ]
   
   summary_stack <- replicate(t[[1]], n = nrow(f_grid))
   
-  for(i in seq_len(nrow(f_grid))){
-    mat <- raster::focalWeight(t, f_grid$width[i], type=c('circle'))
+  for (i in seq_len(nrow(f_grid))) {
+    mat <- raster::focalWeight(t, f_grid$width[i], type = c('circle'))
     
     if (f_grid$fun[i] == 'mean') {
       summary_stack[[i]] <- raster::focal(
-        pca_stack[[f_grid$pca_axis[i]]],
+        output_stack[[f_grid$env_axis[i]]],
         w = mat,
         fun = base::mean,
         na.rm = TRUE,
@@ -250,7 +272,7 @@ mean_var <- function(tile, axes = 3, f_width, fill_na = TRUE){
     
     if (f_grid$fun[i] == 'var') {
       summary_stack[[i]] <- raster::focal(
-        pca_stack[[f_grid$pca_axis[i]]],
+        output_stack[[f_grid$env_axis[i]]],
         w = mat,
         fun = stats::var,
         na.rm = TRUE,
@@ -316,10 +338,10 @@ mean_var <- function(tile, axes = 3, f_width, fill_na = TRUE){
 remove_buffer <- function(tile, b){
   t <- raster::stack(tile)
   buff_e <- raster::extent(t)
-  no_buff_e <- raster::extent(buff_e[1] - b,
-                      buff_e[2] + b,
-                      buff_e[3] - b,
-                      buff_e[4] + b)
+  no_buff_e <- raster::extent(buff_e[1] + b,
+                      buff_e[2] - b,
+                      buff_e[3] + b,
+                      buff_e[4] - b)
   crp <- raster::crop(t, no_buff_e)
   raster::writeRaster(crp, tile, overwrite = TRUE)
 }
