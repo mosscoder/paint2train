@@ -129,7 +129,7 @@ p2t <- function(umap_dir, label_dir, label_key, label_cols,
     shiny::tags$style('.leaflet-container { cursor: auto !important; }' ),
     
     leaflet::leafletOutput('leafmap', height = '100vh'),
-    shinybusy::use_busy_spinner(spin = "fading-circle", position = "bottom-left"),
+    shinybusy::use_busy_spinner(spin = "fingerprint", position = "bottom-left",  color = '#ff1d5e'),
     
     shiny::absolutePanel(
       top = 10,
