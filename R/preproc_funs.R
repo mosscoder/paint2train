@@ -135,7 +135,7 @@ sobel <- function(tile, axes = 3, fill_na = TRUE){
   
   
   for(i in seq_len(lyrs)){
-    if(axes > 0) {dat <- pca[, i, drop = FALSE]} else {dat <- values(t[[i]])}
+    if(axes > 0) {dat <- pca[, i, drop = FALSE]} else {dat <- raster::values(t[[i]])}
     raster::values(output_stack[[i]]) <- dat
     sx <- raster::focal(output_stack[[i]], w = sb_x_mat, na.rm = TRUE)
     sy <- raster::focal(output_stack[[i]], w = sb_y_mat, na.rm = TRUE)

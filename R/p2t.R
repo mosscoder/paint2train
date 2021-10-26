@@ -111,14 +111,14 @@ p2t <- function(umap_dir, label_dir, label_key, label_cols,
   band_choices <- seq_len(band_count)
   
   paint_files <- file.path(tempdir(), 
-                           str_replace(basename(umap_files), 
+                           stringr::str_replace(basename(umap_files), 
                                        pattern = '.tif', '_paint.tif')
-                           )
+  )
   
   for(i in seq_along(paint_files)){
-     pf <- raster::raster(umap_files[i])[[1]]
-     raster::values(pf) <- NA
-     raster::writeRaster(pf, paint_files[i], overwrite = TRUE)
+    pf <- raster::raster(umap_files[i])[[1]]
+    raster::values(pf) <- NA
+    raster::writeRaster(pf, paint_files[i], overwrite = TRUE)
   }
   
   
@@ -129,6 +129,7 @@ p2t <- function(umap_dir, label_dir, label_key, label_cols,
     shiny::tags$style('.leaflet-container { cursor: auto !important; }' ),
     
     leaflet::leafletOutput('leafmap', height = '100vh'),
+    shinybusy::use_busy_spinner(spin = "fading-circle", position = "bottom-left"),
     
     shiny::absolutePanel(
       top = 10,
@@ -257,6 +258,15 @@ p2t <- function(umap_dir, label_dir, label_key, label_cols,
                            selected = names(label_key)[0]
                          ),
                          shiny::sliderInput(
+                           inputId = 'click_sens',
+                           label = 'Initial sensitivity',
+                           ticks = FALSE,
+                           value = 20,
+                           min = 2,
+                           max = 100,
+                           step = 1
+                         ),
+                         shiny::sliderInput(
                            inputId = 'thresh',
                            label = 'Dissimilarity threshold',
                            ticks = FALSE,
@@ -332,6 +342,7 @@ p2t <- function(umap_dir, label_dir, label_key, label_cols,
     
     output$leafmap <-
       leaflet::renderLeaflet(
+        
         leaflet::leaflet(options = leaf_opts) %>%
           leaflet::fitBounds(
             lng1 = ras_bounds()[1],
@@ -364,6 +375,7 @@ p2t <- function(umap_dir, label_dir, label_key, label_cols,
     
     
     shiny::observe({
+      shinybusy::show_spinner()
       leaflet::leafletProxy('leafmap') %>%
         leaflet::clearControls() %>%
         leaflet::clearGroup('Trule color') %>%
@@ -406,7 +418,7 @@ p2t <- function(umap_dir, label_dir, label_key, label_cols,
                                   options = leaflet::layersControlOptions(collapsed = FALSE)) %>%
         leaflet::hideGroup('UMAP') %>%
         leaflet::hideGroup('NIR false color') 
-      
+      shinybusy::hide_spinner()
     })
     
     shiny::observeEvent(c(input$u_1, input$u_2, input$u_3), {
@@ -449,12 +461,35 @@ p2t <- function(umap_dir, label_dir, label_key, label_cols,
       edit_status$status <- FALSE
     })
     
-    umap_vals <- shiny::eventReactive(input$leafmap_click, {
+    dist_vals <- shiny::eventReactive(input$leafmap_click, {
       if (is.null(click_coords()))
         return()
-      vals <- raster::extract(umap_ras(), click_coords())
-      print(vals)
-      vals
+      shinybusy::show_spinner()
+      vals <- raster::extract(umap_ras(), click_coords()) %>% as.data.frame()
+      
+      if (is.na(vals[1]))
+        return()
+      
+      colnames(vals) <- c('u1','u2','u3')
+      
+      udf <- data.frame(u1 = raster::values(umap_ras()[[1]]),
+                        u2 = raster::values(umap_ras()[[2]]),
+                        u3 = raster::values(umap_ras()[[3]]))
+      
+      dist <- RANN::nn2(data = vals,
+                        query = umap_pts())$nn.dists %>% unlist() %>% scales::rescale()
+      
+      clst <- kmeans(rbind(vals, udf), centers = input$click_sens)$cluster
+      inclust <- which(clst[-1] == clst[1])
+      
+      painted_ras <- raster::raster(paint_file())
+      raster::values(painted_ras) <- NA
+      raster::values(painted_ras)[inclust] <- 1
+      raster::writeRaster(painted_ras, paint_file(), overwrite = TRUE)
+      
+      shiny::updateSliderInput(inputId = "thresh", value = max(dist[inclust]))
+      shinybusy::hide_spinner()
+      dist
     })
     
     shiny::observe({
@@ -466,20 +501,14 @@ p2t <- function(umap_dir, label_dir, label_key, label_cols,
       }
     })
     
-    shiny::observeEvent(c(input$leafmap_click, input$thresh) , {
-      print(edit_status$status)
-      if (is.na(umap_vals()[1]) | isTRUE(edit_status$status))
+    
+    shiny::observeEvent(input$thresh , {
+      if (is.na(dist_vals()[1]) | isTRUE(edit_status$status))
         return()
       
-      udf <- data.frame(u1 = raster::values(umap_ras()[[1]]),
-                        u2 = raster::values(umap_ras()[[2]]),
-                        u3 = raster::values(umap_ras()[[3]]))
-      
-      dists <- RANN::nn2(data = umap_vals(),
-                         query = umap_pts())$nn.dists %>% unlist()
       painted_ras <- raster::raster(paint_file())
       raster::values(painted_ras) <-
-        ifelse(scales::rescale(dists) < input$thresh, 1, NA)
+        ifelse(dist_vals() < input$thresh, 1, NA)
       
       raster::writeRaster(painted_ras, paint_file(), overwrite = TRUE)
       
@@ -551,6 +580,7 @@ p2t <- function(umap_dir, label_dir, label_key, label_cols,
         if(isTRUE(edit_status$status))
           return()
         
+        shiny::req(dist_vals())
         painted_ras <- shiny::req(paint_r())
         
         leaflet::leafletProxy(map = 'leafmap') %>%
@@ -622,7 +652,7 @@ p2t <- function(umap_dir, label_dir, label_key, label_cols,
     )
     
     session$onSessionEnded(function() {
-        file.remove(paint_files)
+      file.remove(paint_files)
     })
     
   }
@@ -630,4 +660,6 @@ p2t <- function(umap_dir, label_dir, label_key, label_cols,
   shiny::shinyApp(ui = ui, server = server)
   
 }
+
+
 
