@@ -17,6 +17,7 @@ Imports:
     RANN,
     raster,
     scales,
+    sf,
     shiny,
     shinybusy,
     sp,
