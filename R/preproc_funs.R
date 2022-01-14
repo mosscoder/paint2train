@@ -29,7 +29,7 @@
 #' ls <- 30 #how big should the tiles be, this is the side length (in units of data, meters here)
 #' buff <- 5  #buffer in native units of CRS
 #' cores <- ifelse(.Platform$OS.type == 'unix', #how many cores to use for preprocessing
-#'                    detectCores() - 1,
+#'                    parallel::detectCores() - 1,
 #'                    1) 
 #'                    
 #' tile_at_coords(coords = coord_mat,
@@ -90,7 +90,7 @@ ndvi_msavi <- function(tile, r_band = 1, nir_band = 4){
 #' ls <- 30 #how big should the tiles be, this is the side length (in units of data, meters here)
 #' buff <- 5  #buffer in native units of CRS
 #' cores <- ifelse(.Platform$OS.type == 'unix', #how many cores to use for preprocessing
-#'                    detectCores() - 1,
+#'                    parallel::detectCores() - 1,
 #'                    1) 
 #'                    
 #' tile_at_coords(coords = coord_mat,
@@ -184,7 +184,7 @@ sobel <- function(tile, axes = 3, fill_na = TRUE){
 #' ls <- 30 #how big should the tiles be, this is the side length (in units of data, meters here)
 #' buff <- 5  #buffer in native units of CRS
 #' cores <- ifelse(.Platform$OS.type == 'unix', #how many cores to use for preprocessing
-#'                    detectCores() - 1,
+#'                    parallel::detectCores() - 1,
 #'                    1) 
 #'                    
 #' tile_at_coords(coords = coord_mat,
@@ -316,7 +316,7 @@ mean_var <- function(tile,
 #' ls <- 30 #how big should the tiles be, this is the side length (in units of data, meters here)
 #' buff <- 5  #buffer in native units of CRS
 #' cores <- ifelse(.Platform$OS.type == 'unix', #how many cores to use for preprocessing
-#'                    detectCores() - 1,
+#'                    parallel::detectCores() - 1,
 #'                    1) 
 #'                    
 #' tile_at_coords(coords = coord_mat,

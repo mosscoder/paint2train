@@ -52,9 +52,9 @@
 #' ls <- 30 #how big should the tiles be, this is the side length (in units of data, meters here)
 #' buff <- 5  #buffer in native units of CRS
 #' cores <- ifelse(.Platform$OS.type == 'unix', #how many cores to use for preprocessing
-#'                    detectCores() - 1,
+#'                    parallel::detectCores() - 1,
 #'                    1) 
-#' umap_cores <- detectCores() - 1                  
+#' umap_cores <- parallel::detectCores() - 1                  
 #'    
 #'                    
 #' tile_at_coords(coords = coord_mat,
@@ -112,7 +112,7 @@ p2t <- function(umap_dir, label_dir, label_key, label_cols,
   
   paint_files <- file.path(tempdir(), 
                            stringr::str_replace(basename(umap_files), 
-                                       pattern = '.tif', '_paint.tif')
+                                                pattern = '.tif', '_paint.tif')
   )
   
   for(i in seq_along(paint_files)){
@@ -121,6 +121,10 @@ p2t <- function(umap_dir, label_dir, label_key, label_cols,
     raster::writeRaster(pf, paint_files[i], overwrite = TRUE)
   }
   
+  RES <- raster::res(pf)[1]
+  xdim <- raster::ncol(pf)*RES
+  ydim <- raster::nrow(pf)*RES
+  maxdist <- round(sqrt(xdim^2 + ydim^2)) + 1
   
   split_format <- shiny::tags$head(shiny::tags$style(htmltools::HTML(".shiny-split-layout > div { overflow: visible; }")))
   abs_style <- "background:white; padding: 20px 20px 20px 20px; border-radius: 5pt;"
@@ -258,15 +262,6 @@ p2t <- function(umap_dir, label_dir, label_key, label_cols,
                            selected = names(label_key)[0]
                          ),
                          shiny::sliderInput(
-                           inputId = 'click_sens',
-                           label = 'Initial sensitivity',
-                           ticks = FALSE,
-                           value = 20,
-                           min = 2,
-                           max = 100,
-                           step = 1
-                         ),
-                         shiny::sliderInput(
                            inputId = 'thresh',
                            label = 'Dissimilarity threshold',
                            ticks = FALSE,
@@ -274,6 +269,15 @@ p2t <- function(umap_dir, label_dir, label_key, label_cols,
                            min = 0,
                            max = 1,
                            step = 0.005
+                         ),
+                         shiny::sliderInput(
+                           inputId = 'spat_thresh',
+                           label = 'Spatial threshold (meters)',
+                           ticks = FALSE,
+                           value = maxdist,
+                           min = 0,
+                           max = maxdist,
+                           step = 0.1
                          ),
                          
                          shiny::actionButton(inputId = 'assign',
@@ -329,7 +333,7 @@ p2t <- function(umap_dir, label_dir, label_key, label_cols,
     })
     
     umap_pts <- shiny::reactive({
-      raster::rasterToPoints(umap_ras())[,3:5]
+      raster::rasterToPoints(umap_ras())[,1:5]
     })
     
     ras_bounds <- shiny::reactive({
@@ -338,7 +342,6 @@ p2t <- function(umap_dir, label_dir, label_key, label_cols,
     })
     
     leaf_opts <- leaflet::leafletOptions(zoomControl = FALSE)
-    
     
     output$leafmap <-
       leaflet::renderLeaflet(
@@ -437,9 +440,26 @@ p2t <- function(umap_dir, label_dir, label_key, label_cols,
       
     })
     
+    edit_status <- shiny::reactiveValues(status = FALSE)
+    
+    shiny::observeEvent(c(input$leafmap_draw_start,
+                          input$leafmap_draw_new_feature,
+                          input$leafmap_draw_edited_features),{
+                            edit_status$status <- TRUE
+                            print('Drawing')
+                          })
+    
+    shiny::observeEvent(c(input$leafmap_draw_stop,
+                          input$leafmap_draw_deleted_features),{
+                            edit_status$status <- FALSE
+                            print('Drawing stopped')
+                          })
+    
+    shiny::observe({edit_status$status})
+    
     click_coords <- shiny::eventReactive(input$leafmap_click, {
       click <- input$leafmap_click
-      if (is.null(click))
+      if (is.null(click) | isTRUE(edit_status$status))
         return()
       
       click_xy <-
@@ -448,27 +468,32 @@ p2t <- function(umap_dir, label_dir, label_key, label_cols,
           proj4string = raster::crs('+init=epsg:4326')
         )
       click_trans <- sp::spTransform(click_xy, targ_crs)
+      if(is.na(raster::extract(umap_ras()[[1]], click_trans)))
+        return()
+      click_trans
+    })
+    
+    
+    spat_dist <- shiny::eventReactive(input$leafmap_click,{
+      if(is.null(click_coords()))
+        return()
+      shinybusy::show_spinner()
+      xys <- click_coords() %>%
+        sf::st_as_sf() %>%
+        sf::st_coordinates()
       
+      shinybusy::hide_spinner()
+      spatial_dist <- RANN::nn2(data = xys,
+                                query = umap_pts()[, 1:2])$nn.dists %>% unlist()
+      return(spatial_dist)
     })
     
-    edit_status <- shiny::reactiveValues(status = FALSE)
-    
-    shiny::observeEvent(input$leafmap_draw_start, {
-      edit_status$status <- TRUE
-    })
-    
-    shiny::observeEvent(input$leafmap_draw_stop, {
-      edit_status$status <- FALSE
-    })
-    
-    dist_vals <- shiny::eventReactive(input$leafmap_click, {
+    dist_vals <- shiny::eventReactive(input$leafmap_click,{
       if (is.null(click_coords()))
         return()
       shinybusy::show_spinner()
       vals <- raster::extract(umap_ras(), click_coords()) %>% as.data.frame()
       
-      if (is.na(vals[1]))
-        return()
       
       colnames(vals) <- c('u1','u2','u3')
       
@@ -477,19 +502,20 @@ p2t <- function(umap_dir, label_dir, label_key, label_cols,
                         u3 = raster::values(umap_ras()[[3]]))
       
       dist <- RANN::nn2(data = vals,
-                        query = umap_pts())$nn.dists %>% unlist() %>% scales::rescale()
-      
-      clst <- kmeans(rbind(vals, udf), centers = input$click_sens)$cluster
-      inclust <- which(clst[-1] == clst[1])
+                        query = umap_pts()[,3:5])$nn.dists %>% unlist() %>% scales::rescale()
       
       painted_ras <- raster::raster(paint_file())
       raster::values(painted_ras) <- NA
-      raster::values(painted_ras)[inclust] <- 1
+      good_spat <- which(spat_dist() < input$spat_thresh)
+      good_dissim <-  which(dist < input$thresh)
+      keepers <- intersect(good_spat, good_dissim)
+      
+      raster::values(painted_ras)[keepers] <- 1
+      
       raster::writeRaster(painted_ras, paint_file(), overwrite = TRUE)
       
-      shiny::updateSliderInput(inputId = "thresh", value = max(dist[inclust]))
       shinybusy::hide_spinner()
-      dist
+      return(dist)
     })
     
     shiny::observe({
@@ -501,17 +527,18 @@ p2t <- function(umap_dir, label_dir, label_key, label_cols,
       }
     })
     
-    
-    shiny::observeEvent(input$thresh , {
-      if (is.na(dist_vals()[1]) | isTRUE(edit_status$status))
+    shiny::observeEvent(c(input$thresh, input$spat_thresh), {
+      if (is.null(dist_vals()[1]))
         return()
       
       painted_ras <- raster::raster(paint_file())
-      raster::values(painted_ras) <-
-        ifelse(dist_vals() < input$thresh, 1, NA)
+      good_spat <- which(spat_dist() < input$spat_thresh)
+      good_dissim <-  which(dist_vals() < input$thresh)
+      keepers <- intersect(good_spat, good_dissim)
+      raster::values(painted_ras) <- NA
+      raster::values(painted_ras)[keepers] <- 1
       
       raster::writeRaster(painted_ras, paint_file(), overwrite = TRUE)
-      
     })
     
     shiny::observeEvent(input$filter_noise, {
@@ -574,11 +601,9 @@ p2t <- function(umap_dir, label_dir, label_key, label_cols,
         input$leafmap_click,
         input$paint_col,
         input$paint_op,
-        input$thresh
+        input$thresh,
+        input$spat_thresh
       ),{
-        
-        if(isTRUE(edit_status$status))
-          return()
         
         shiny::req(dist_vals())
         painted_ras <- shiny::req(paint_r())
@@ -618,8 +643,6 @@ p2t <- function(umap_dir, label_dir, label_key, label_cols,
         input$assign_draw
       ),{
         
-        if(isTRUE(edit_status$status))
-          return()
         
         labs <- shiny::req(lab_r())
         
