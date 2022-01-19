@@ -1,3 +1,5 @@
+images/**
+p2t_supporting_data/**
 demo_app/**
 test/**
 .Rproj.user
