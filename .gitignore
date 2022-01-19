@@ -1,0 +1,11 @@
+images/**
+pt2_supporting_data/**
+demo_app/**
+test/**
+.Rproj.user
+.Rhistory
+.RData
+.Ruserdata
+LICENSE.md
+README.knit.md
+README.utf8.md

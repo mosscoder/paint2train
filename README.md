@@ -39,7 +39,7 @@ library(paint2train)
 library(ranger)
 
 image_dir <- tempfile()
-URL <- 'https://storage.googleapis.com/mpgranch_data/sample_4band.tif'
+URL <- 'https://github.com/mosscoder//pt2_supporting_data/blob/main/sample_4band.tif?raw=true'
 download.file(url = URL, destfile = image_dir)
 
 par(mfrow = c(2,1))  

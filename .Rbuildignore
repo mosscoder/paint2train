@@ -1,0 +1,7 @@
+^.*\.Rproj$
+^\.Rproj\.user$
+^test$
+^demo_app$
+^LICENSE\.md$
+^data$
+^images$
