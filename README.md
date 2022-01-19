@@ -52,6 +52,7 @@ par(mfrow = c(1,1))
 ```
 
 <img src="https://github.com/mosscoder//pt2_supporting_data/blob/main/plot_src_image.png?raw=true" width="100%" />
+
 Next build the directories necessary to house tiles, pre-processed
 intermediaries, and labeled data.
 
@@ -211,7 +212,7 @@ p2t(umap_dir = umap_dir,
 ## Data Labeling Process
 
 Select imagery tiles from the dropdown menu found in the upper left.
-<img src="https://github.com/mosscoder/pt2_supporting_data/blob/main/banner.png?raw=true" width="100%" />
+<img src="https://github.com/mosscoder/pt2_supporting_data/blob/main/image_select.gif?raw=true" width="100%" />
 
 Click on a region you wish to classify and adjust the **Dissimilarity
 Threshold** to match the extent of the class to label.
