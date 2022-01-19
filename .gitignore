@@ -1,6 +1,9 @@
-/Users/kyledoherty/mpgPostdoc/projects/paint2train/demo_app/*
-/Users/kyledoherty/mpgPostdoc/projects/paint2train/test/*
+demo_app/**
+test/**
 .Rproj.user
 .Rhistory
 .RData
 .Ruserdata
+LICENSE.md
+README.knit.md
+README.utf8.md
