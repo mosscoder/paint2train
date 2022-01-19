@@ -1,0 +1,12 @@
+name: paint2train_sandbox
+title: paint2train_sandbox
+username:
+account: mpgranch
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 4073075
+bundleId: 4586490
+url: https://mpgranch.shinyapps.io/paint2train_sandbox/
+when: 1620752155.27763
+asMultiple: FALSE
+asStatic: FALSE
