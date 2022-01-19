@@ -3,7 +3,7 @@ title: "paint2train package"
 output: github_document
 ---
 ```{r, echo=FALSE, out.width="100%"}
-knitr::include_graphics("https://github.com/mosscoder/paint2train/blob/main/images/combo_banner.gif?raw=true")
+knitr::include_graphics("https://github.com/mosscoder//pt2_supporting_data/blob/main/combo_banner.gif?raw=true")
 ```
 
 ## Background
@@ -39,7 +39,7 @@ mtext("15cm true and NIR false color imagery", side = 3, line = -1, outer = TRUE
 par(mfrow = c(1,1))  
 ```
 ```{r, echo=FALSE, out.width="100%"}
-knitr::include_graphics("https://github.com/mosscoder/paint2train/blob/main/images/plot_src_image.png?raw=true")
+knitr::include_graphics("https://github.com/mosscoder//pt2_supporting_data/blob/main/plot_src_image.png?raw=true")
 ```
 Next build the directories necessary to house tiles, pre-processed intermediaries, and labeled data. 
 ```{r, eval = FALSE}
@@ -84,7 +84,7 @@ tile_at_coords(coords = coord_mat,
                ncores = pre_cores)
 ```
 ```{r, echo=FALSE, out.width="100%"}
-knitr::include_graphics("https://github.com/mosscoder/paint2train/blob/main/images/focal_tiles_rgb.png?raw=true")
+knitr::include_graphics("https://github.com/mosscoder//pt2_supporting_data/blob/main/focal_tiles_rgb.png?raw=true")
 ```
 Generate NDVI... 
 ```{r, eval=FALSE}
@@ -95,11 +95,11 @@ mclapply(
 )
 ```
 ```{r, echo=FALSE, out.width="100%"}
-knitr::include_graphics("https://github.com/mosscoder/paint2train/blob/main/images/ndvi.png?raw=true")
+knitr::include_graphics("https://github.com/mosscoder//pt2_supporting_data/blob/main/ndvi.png?raw=true")
 ```
 ... and MSAVI values at tiles. 
 ```{r, echo=FALSE, out.width="100%"}
-knitr::include_graphics("https://github.com/mosscoder/paint2train/blob/main/images/msavi.png?raw=true")
+knitr::include_graphics("https://github.com/mosscoder//pt2_supporting_data/blob/main/msavi.png?raw=true")
 ```
 Create edge detection layers by applying a Sobel filter across the first three PCA axes of data generated thus far.
 ```{r, eval=FALSE}
@@ -110,7 +110,7 @@ mclapply(
 )
 ```
 ```{r, echo=FALSE, out.width="100%"}
-knitr::include_graphics("https://github.com/mosscoder/paint2train/blob/main/images/sobel.png?raw=true")
+knitr::include_graphics("https://github.com/mosscoder//pt2_supporting_data/blob/main/sobel.png?raw=true")
 ```
 Calculate mean and variance in 0.25, 0.5, and 1 meter neighborhoods for first three PCA axes of data generated up to this point.
 The extents of these neighborhoods are a critical tuning parameter that will need to be paired with a particular dataset and modeling objective.
@@ -132,7 +132,7 @@ mclapply(FUN = remove_buffer,
 ```
 Here is a sample of the outputs of the focal calculations described above for the first tile.
 ```{r, echo=FALSE, out.width="100%"}
-knitr::include_graphics("https://github.com/mosscoder/paint2train/blob/main/images/neighbs.png?raw=true")
+knitr::include_graphics("https://github.com/mosscoder//pt2_supporting_data/blob/main/neighbs.png?raw=true")
 ```
 
 ## Dimension Reduction
@@ -146,7 +146,7 @@ lapply(FUN = umap_tile,
 ```
 Compare the original RGB tiles with outcomes from pre-processing and dimension reduction. UMAP space is represented in similarity colors. 
 ```{r, echo=FALSE, out.width="100%"}
-knitr::include_graphics("https://github.com/mosscoder/paint2train/blob/main/images/umap_example.png?raw=true")
+knitr::include_graphics("https://github.com/mosscoder//pt2_supporting_data/blob/main/umap_example.png?raw=true")
 ```
 
 ## Running App Locally
@@ -172,42 +172,42 @@ p2t(umap_dir = umap_dir,
 ## Data Labeling Process
 Select imagery tiles from the dropdown menu found in the upper left. 
 ```{r, echo=FALSE, out.width="100%"}
-knitr::include_graphics("https://github.com/mosscoder/paint2train/blob/main/images/image_select.gif?raw=true")
+knitr::include_graphics("https://github.com/mosscoder/pt2_supporting_data/blob/main/banner.png?raw=true")
 ```
 
 Click on a region you wish to classify and adjust the **Dissimilarity Threshold** to match the extent of the class to label. 
 ```{r, echo=FALSE, out.width="100%"}
-knitr::include_graphics("https://github.com/mosscoder/paint2train/blob/main/images/click_paint.gif?raw=true")
+knitr::include_graphics("https://github.com/mosscoder//pt2_supporting_data/blob/main/click_paint.gif?raw=true")
 ```
 
 Select which class to label from the **Labeling Tools** menu, then click the **Label painted areas** button to save the painted pixels to that class. After painting and labeling focal areas, fill the remaining unlabeled points by click the **FIll unlabeled as class** button.
 ```{r, echo=FALSE, out.width="100%"}
-knitr::include_graphics("https://github.com/mosscoder/paint2train/blob/main/images/label_class.gif?raw=true")
+knitr::include_graphics("https://github.com/mosscoder//pt2_supporting_data/blob/main/label_class.gif?raw=true")
 ```
 
 Adjust the color of painted areas from the **Aesthetics Controls** drop down menu.
 ```{r, echo=FALSE, out.width="100%"}
-knitr::include_graphics("https://github.com/mosscoder/paint2train/blob/main/images/change_paint.gif?raw=true")
+knitr::include_graphics("https://github.com/mosscoder//pt2_supporting_data/blob/main/change_paint.gif?raw=true")
 ```
 
 Manually edit pixels by using the draw tools (lower right). Draw a box or polygon around the region you wish to edit, select the appropriate class from the **Select class to label** menu, then click **Label drawn areas**
 ```{r, echo=FALSE, out.width="100%"}
-knitr::include_graphics("https://github.com/mosscoder/paint2train/blob/main/images/draw.gif?raw=true")
+knitr::include_graphics("https://github.com/mosscoder//pt2_supporting_data/blob/main/draw.gif?raw=true")
 ```
 
 Change the base imagery with the controls in the upper right. 
 ```{r, echo=FALSE, out.width="100%"}
-knitr::include_graphics("https://github.com/mosscoder/paint2train/blob/main/images/base_select.gif?raw=true")
+knitr::include_graphics("https://github.com/mosscoder//pt2_supporting_data/blob/main/base_select.gif?raw=true")
 ```
 
 Filter high and low value outlier pixels to brighten or darken base imagery layers by adjusting the **Baselayer quantiles** in the **Aesthetics controls** drop down menu. 
 ```{r, echo=FALSE, out.width="100%"}
-knitr::include_graphics("https://github.com/mosscoder/paint2train/blob/main/images/quantiles.gif?raw=true")
+knitr::include_graphics("https://github.com/mosscoder//pt2_supporting_data/blob/main/quantiles.gif?raw=true")
 ```
 
 Click and drag to move the controls as needed.
 ```{r, echo=FALSE, out.width="100%"}
-knitr::include_graphics("https://github.com/mosscoder/paint2train/blob/main/images/move_controls.gif?raw=true")
+knitr::include_graphics("https://github.com/mosscoder//pt2_supporting_data/blob/main/move_controls.gif?raw=true")
 ```
 
 ## Model Training
@@ -277,5 +277,5 @@ leaflet() %>%
                    options = layersControlOptions(collapsed = FALSE))
 ```
 ```{r, echo=FALSE, out.width="100%"}
-knitr::include_graphics("https://github.com/mosscoder/paint2train/blob/main/images/rf_mod_output.png?raw=true")
+knitr::include_graphics("https://github.com/mosscoder//pt2_supporting_data/blob/main/rf_mod_output.png?raw=true")
 ```
