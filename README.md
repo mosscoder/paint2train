@@ -21,8 +21,7 @@ There are currently four primary functions:
     thresholds (in UMAP space) to clicked points (labels are saved as
     .tifs as you work)
 
-[Try out the DEMO of app
-here](https://mpgranch.shinyapps.io/paint2train_sandbox/)
+# [Try out a DEMO of the app here!](https://mpgranch.shinyapps.io/paint2train_sandbox/)
 
 ## Installation
 
