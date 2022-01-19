@@ -19,8 +19,10 @@ There are currently four primary functions:
     dimension reduction methods](https://github.com/jlmelville/uwot)
 -   Run a local Shiny app to rapidly label pixels based on dissimilarity
     thresholds (in UMAP space) to clicked points (labels are saved as
-    .tifs as you work; [demo of app
-    here](https://mpgranch.shinyapps.io/paint2train_sandbox/))
+    .tifs as you work)
+
+[Try out the DEMO of app
+here](https://mpgranch.shinyapps.io/paint2train_sandbox/)
 
 ## Installation
 

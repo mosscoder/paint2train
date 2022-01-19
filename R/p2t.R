@@ -544,7 +544,7 @@ p2t <- function(umap_dir, label_dir, label_key, label_cols,
     shiny::observeEvent(input$filter_noise, {
       painted_ras <-
         raster::raster(paint_file())
-      
+      shinybusy::show_spinner()
       f <-
         raster::focal(painted_ras,
                       FUN = sum,
@@ -552,7 +552,7 @@ p2t <- function(umap_dir, label_dir, label_key, label_cols,
                       w = matrix(1, 3, 3))
       loners <- which(raster::values(f) == 1)
       raster::values(painted_ras)[loners] <- NA
-      
+      shinybusy::hide_spinner()
       raster::writeRaster(painted_ras, paint_file(), overwrite = TRUE)
     })
     
@@ -602,7 +602,8 @@ p2t <- function(umap_dir, label_dir, label_key, label_cols,
         input$paint_col,
         input$paint_op,
         input$thresh,
-        input$spat_thresh
+        input$spat_thresh,
+        input$filter_noise
       ),{
         
         shiny::req(dist_vals())
