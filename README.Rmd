@@ -29,7 +29,7 @@ library(paint2train)
 library(ranger)
 
 image_dir <- tempfile()
-URL <- 'https://github.com/mosscoder/paint2train/blob/main/data/sample_4band.tif?raw=true'
+URL <- 'https://storage.googleapis.com/mpgranch_data/sample_4band.tif'
 download.file(url = URL, destfile = image_dir)
 
 par(mfrow = c(2,1))  
@@ -156,7 +156,7 @@ label_key <- list(Unknown = 0,
            `Not woody` = 1,
            `Woody` = 2)
 
-pal <- list('royalblue', 
+pal <- c('royalblue', 
          'tan', 
          'green')
 ```

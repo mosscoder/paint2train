@@ -10,7 +10,7 @@
 #' library(paint2train)
 #' 
 #' image_dir <- tempfile()
-#' image_url <- 'https://github.com/mosscoder/paint2train/blob/main/data/sample_4band.tif?raw=true'
+#' image_url <- 'https://storage.googleapis.com/mpgranch_data/sample_4band.tif'
 #' download.file(url = image_url, destfile = image_dir)
 #' tdir <- tempdir()
 #' setwd(tdir) 
@@ -71,7 +71,7 @@ ndvi_msavi <- function(tile, r_band = 1, nir_band = 4){
 #' library(paint2train)
 #' 
 #' image_dir <- tempfile()
-#' image_url <- 'https://github.com/mosscoder/paint2train/blob/main/data/sample_4band.tif?raw=true'
+#' image_url <- 'https://storage.googleapis.com/mpgranch_data/sample_4band.tif'
 #' download.file(url = image_url, destfile = image_dir)
 #' tdir <- tempdir()
 #' setwd(tdir) 
@@ -165,7 +165,7 @@ sobel <- function(tile, axes = 3, fill_na = TRUE){
 #' library(paint2train)
 #' 
 #' image_dir <- tempfile()
-#' image_url <- 'https://github.com/mosscoder/paint2train/blob/main/data/sample_4band.tif?raw=true'
+#' image_url <- 'https://storage.googleapis.com/mpgranch_data/sample_4band.tif'
 #' download.file(url = image_url, destfile = image_dir)
 #' tdir <- tempdir()
 #' setwd(tdir) 
@@ -297,7 +297,7 @@ mean_var <- function(tile,
 #' library(paint2train)
 #' 
 #' image_dir <- tempfile()
-#' image_url <- 'https://github.com/mosscoder/paint2train/blob/main/data/sample_4band.tif?raw=true'
+#' image_url <- 'https://storage.googleapis.com/mpgranch_data/sample_4band.tif'
 #' download.file(url = image_url, destfile = image_dir)
 #' tdir <- tempdir()
 #' setwd(tdir) 

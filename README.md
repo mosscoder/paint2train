@@ -11,13 +11,13 @@ train machine learning algorithms for tasks such as image segmentation.
 
 There are currently four primary functions:
 
-  - Generate tiles from larger contiguous sources of multi-spectral
+-   Generate tiles from larger contiguous sources of multi-spectral
     imagery or other spatial data
-  - Pre-process tiles, generating normalized difference, edge detection,
+-   Pre-process tiles, generating normalized difference, edge detection,
     and neighborhood summary stats layers
-  - Reduce n layers from pre-processing steps into 3 layers, using [UMAP
+-   Reduce n layers from pre-processing steps into 3 layers, using [UMAP
     dimension reduction methods](https://github.com/jlmelville/uwot)
-  - Run a local Shiny app to rapidly label pixels based on dissimilarity
+-   Run a local Shiny app to rapidly label pixels based on dissimilarity
     thresholds (in UMAP space) to clicked points (labels are saved as
     .tifs as you work; [demo of app
     here](https://mpgranch.shinyapps.io/paint2train_sandbox/))
@@ -39,7 +39,7 @@ library(paint2train)
 library(ranger)
 
 image_dir <- tempfile()
-URL <- 'https://github.com/mosscoder/paint2train/blob/main/data/sample_4band.tif?raw=true'
+URL <- 'https://storage.googleapis.com/mpgranch_data/sample_4band.tif'
 download.file(url = URL, destfile = image_dir)
 
 par(mfrow = c(2,1))  
@@ -191,7 +191,7 @@ label_key <- list(Unknown = 0,
            `Not woody` = 1,
            `Woody` = 2)
 
-pal <- list('royalblue', 
+pal <- c('royalblue', 
          'tan', 
          'green')
 ```
