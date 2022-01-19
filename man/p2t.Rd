@@ -55,7 +55,7 @@ those provided in the label_key.
 library(paint2train)
 
 image_dir <- tempfile()
-image_url <- 'https://github.com/mosscoder/paint2train/blob/main/data/sample_4band.tif?raw=true'
+image_url <- 'https://storage.googleapis.com/mpgranch_data/sample_4band.tif'
 download.file(url = image_url, destfile = image_dir)
 tdir <- tempdir()
 setwd(tdir) 
@@ -116,7 +116,7 @@ label_key <- list(Unknown = 0,
         `Not woody` = 1,
         `Woody` = 2)
 #Establish the color  for each class for app visualization
-pal <- list('royalblue',
+pal <- c('royalblue',
         'tan',
         'green')
 

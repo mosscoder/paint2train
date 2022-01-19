@@ -21,7 +21,7 @@ Removes buffers if included with tile_at_coords() after pre-processing.
 library(paint2train)
 
 image_dir <- tempfile()
-image_url <- 'https://github.com/mosscoder/paint2train/blob/main/data/sample_4band.tif?raw=true'
+image_url <- 'https://storage.googleapis.com/mpgranch_data/sample_4band.tif'
 download.file(url = image_url, destfile = image_dir)
 tdir <- tempdir()
 setwd(tdir) 
