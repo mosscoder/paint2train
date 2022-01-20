@@ -16,7 +16,7 @@ There are currently four primary functions:
 * Reduce n layers from pre-processing steps into 3 layers, using [UMAP dimension reduction methods](https://github.com/jlmelville/uwot)
 * Run a local Shiny app to rapidly label pixels based on dissimilarity thresholds (in UMAP space) to clicked points (labels are saved as .tifs as you work)
 
-# [Try out a DEMO of the app here!](https://mpgranch.shinyapps.io/paint2train_sandbox/) 
+# [Try a demo of the app!](https://mpgranch.shinyapps.io/paint2train_sandbox/) 
 
 ## Installation 
 The package may be installed via github. 
